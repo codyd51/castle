@@ -11,9 +11,10 @@ class Board:
     def construct_squares(cls) -> List[List[Square]]:
         board: List[List[Square]] = []
         for rank in range(8):
+            board.append([])
             for file in range(8):
                 square = Square(rank, file)
-                board[rank][file] = square
+                board[rank].append(square)
         return board
 
     def place_piece(self, piece: Piece, location: str) -> None:
@@ -21,4 +22,16 @@ class Board:
         square.occupant = piece
 
     def square_from_notation(self, location: str):
-        pass
+        letter = location[0]
+        # sanity check
+        if letter < 'a' or letter > 'h':
+            raise RuntimeError(f'Invalid chess notation: {location}')
+        file = int(location[1])
+        if file < 1 or file > 8:
+            raise RuntimeError(f'Invalid chess notation: {location}')
+        rank = ord(letter) - ord('a')
+        return self.squares[rank][file]
+
+
+b = Board()
+print(b.square_from_notation('a3'))

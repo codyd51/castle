@@ -4,7 +4,6 @@ from typing import List
 
 class Square:
     def __init__(self, rank: int, file: int):
-
         self.rank: int = rank
         self.file: int = file
         self.occupant: Piece = None
