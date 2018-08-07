@@ -1,0 +1,4 @@
+
+
+class Square:
+    pass
