@@ -8,11 +8,11 @@ class Color(Enum):
 
 class PieceType(Enum):
     PAWN = 1
-    KNIGHT = 3
+    KNIGHT = 2
     BISHOP = 3
-    ROOK = 5
-    QUEEN = 8
-    KING = 999
+    ROOK = 4
+    QUEEN = 5
+    KING = 6
 
 
 class Piece:
@@ -21,5 +21,16 @@ class Piece:
         self.color = color
 
     def __repr__(self):
-        return f'{self.color} {self.type}'
-    
+        return f'<{self.color.value} {self.type.name}>'
+
+    @property
+    def value(self):
+        if self.type == PieceType.PAWN:
+            return 1
+        elif self.type == PieceType.KNIGHT or self.type == PieceType.BISHOP:
+            return 3
+        elif self.type == PieceType.ROOK:
+            return 5
+        elif self.type == PieceType.QUEEN:
+            return 9
+        return 999
