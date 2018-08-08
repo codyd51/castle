@@ -1,6 +1,6 @@
-from typing import List, Set
+from typing import List, Set, Optional
 from castle.square import Square
-from castle.piece import PieceType, Piece
+from castle.piece import PieceType, Piece, Color
 
 
 class InvalidChessNotationError(Exception):
@@ -105,3 +105,29 @@ class Board:
         if file < 0 or file > 7 or rank < 0 or rank > 7:
             raise InvalidChessNotationError(f'{location}')
         return self.squares[rank][file]
+
+    def pretty_print(self):
+        def pretty_print_piece(piece: Optional[Piece]):
+            if not piece:
+                print('_', end='')
+                return
+            acronyms = {
+                PieceType.ROOK:     'R',
+                PieceType.KNIGHT:   'N',
+                PieceType.BISHOP:   'B',
+                PieceType.QUEEN:    'Q',
+                PieceType.KING:     'K',
+                PieceType.PAWN:     'P'
+            }
+            acronym = acronyms[piece.type]
+            if piece.color == Color.BLACK:
+                acronym = acronym.lower()
+            print(acronym, end='')
+
+        print('_________________')
+        for rank in self.squares[::-1]:
+            print('|', end='')
+            for square in rank:
+                pretty_print_piece(square.occupant)
+                print('|', end='')
+            print()
