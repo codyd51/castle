@@ -21,7 +21,7 @@ class Board:
                 board[rank].append(square)
         return board
 
-    def get_moves(self, square: Square):
+    def get_moves(self, square: Square) -> Set[Square]:
         if square.occupant.type is PieceType.PAWN:
             return self._get_pawn_moves(square)
         elif square.occupant.type is PieceType.KNIGHT:
@@ -43,42 +43,42 @@ class Board:
         moves: Set[Square] = set()
         if square.occupant.color is Color.WHITE:
             # Moves forward
-            if self.squares[square.rank + 1][square.file].occupant is None:
-                moves.add(self.squares[square.rank + 1][square.file])
-                if square.rank == 1 and self.squares[3][square.file].occupant is None:
-                    moves.add(self.squares[3][square.file])
+            if self._squares[square.rank + 1][square.file].occupant is None:
+                moves.add(self._squares[square.rank + 1][square.file])
+                if square.rank == 1 and self._squares[3][square.file].occupant is None:
+                    moves.add(self._squares[3][square.file])
             # Left diagonal captures
             if square.file == 0:
                 token = None
             else:
-                token = self.squares[square.rank + 1][square.file - 1]
+                token = self._squares[square.rank + 1][square.file - 1]
             if token and token.occupant and token.occupant.color == Color.BLACK:
                 moves.add(token)
             # Right diagonal captures
             if square.file == 7:
                 token = None
             else:
-                token = self.squares[square.rank + 1][square.file + 1]
+                token = self._squares[square.rank + 1][square.file + 1]
             if token and token.occupant and token.occupant.color == Color.BLACK:
                 moves.add(token)
         if square.occupant.color is Color.BLACK:
             # Moves forward
-            if self.squares[square.rank - 1][square.file].occupant is None:
-                moves.add(self.squares[square.rank - 1][square.file])
-                if square.rank == 6 and self.squares[4][square.file].occupant is None:
-                    moves.add(self.squares[4][square.file])
+            if self._squares[square.rank - 1][square.file].occupant is None:
+                moves.add(self._squares[square.rank - 1][square.file])
+                if square.rank == 6 and self._squares[4][square.file].occupant is None:
+                    moves.add(self._squares[4][square.file])
             # Left diagonal captures
             if square.file == 0:
                 token = None
             else:
-                token = self.squares[square.rank - 1][square.file - 1]
+                token = self._squares[square.rank - 1][square.file - 1]
             if token and token.occupant and token.occupant.color == Color.BLACK:
                 moves.add(token)
             # Right diagonal captures
             if square.file == 7:
                 token = None
             else:
-                token = self.squares[square.rank - 1][square.file + 1]
+                token = self._squares[square.rank - 1][square.file + 1]
             if token and token.occupant and token.occupant.color == Color.BLACK:
                 moves.add(token)
         return moves
@@ -92,7 +92,7 @@ class Board:
         # moves to the upper-left
         for i in range(1, 8):
             try:
-                token: Square = self.squares[square.rank + i][square.file - i]
+                token: Square = self._squares[square.rank + i][square.file - i]
             except IndexError as ie:
                 break
             if token.occupant is None:
