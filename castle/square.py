@@ -12,4 +12,5 @@ class Square:
 
     def __repr__(self):
         file_values = 'abcdefgh'
-        return f'{file_values[self.file]}{self.rank}'
+        # ranks are 1-indexed
+        return f'{file_values[self.file]}{self.rank + 1}'

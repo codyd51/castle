@@ -1,6 +1,10 @@
 from typing import List
-from .square import Square
-from .piece import Piece
+from castle.square import Square
+from castle.piece import PieceType, Piece
+
+
+class InvalidChessNotationError(Exception):
+    pass
 
 
 class Board:
@@ -13,7 +17,7 @@ class Board:
         for rank in range(8):
             board.append([])
             for file in range(8):
-                square = Square(rank, file)
+                square = Square(file, rank)
                 board[rank].append(square)
         return board
 
@@ -21,17 +25,19 @@ class Board:
         square = self.square_from_notation(location)
         square.occupant = piece
 
-    def square_from_notation(self, location: str):
+    def square_from_notation(self, location: str) -> Square:
         letter = location[0]
+        number = location[1]
         # sanity check
         if letter < 'a' or letter > 'h':
-            raise RuntimeError(f'Invalid chess notation: {location}')
-        file = int(location[1])
-        if file < 1 or file > 8:
-            raise RuntimeError(f'Invalid chess notation: {location}')
-        rank = ord(letter) - ord('a')
-        return self.squares[rank][file]
+            raise InvalidChessNotationError(f'{location}')
+        if not number.isnumeric():
+            raise InvalidChessNotationError(f'{location}')
 
+        file = ord(letter) - ord('a')
+        rank = int(location[1]) - 1
 
-b = Board()
-print(b.square_from_notation('a3'))
+        if file < 0 or file > 7 or rank < 0 or rank > 7:
+            raise InvalidChessNotationError(f'{location}')
+        return self.squares[file][rank]
+
