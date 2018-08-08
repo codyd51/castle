@@ -84,3 +84,38 @@ class BoardTests(unittest.TestCase):
             {board.square_from_notation('e3'), board.square_from_notation('e4'),
              board.square_from_notation('d3'), board.square_from_notation('f3')}
         )
+
+    def test_get_rook_moves(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'e5')
+        board.place_piece(Piece(PieceType.ROOK, Color.WHITE), 'c5')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'c3')
+        board.place_piece(Piece(PieceType.ROOK, Color.BLACK), 'e6')
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('c5')),
+            {
+                board.square_from_notation('a5'),
+                board.square_from_notation('b5'),
+                board.square_from_notation('d5'),
+                board.square_from_notation('c4'),
+                board.square_from_notation('c6'),
+                board.square_from_notation('c7'),
+                board.square_from_notation('c8'),
+                board.square_from_notation('c3')
+            }
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('e6')),
+            {
+                board.square_from_notation('a6'),
+                board.square_from_notation('b6'),
+                board.square_from_notation('c6'),
+                board.square_from_notation('d6'),
+                board.square_from_notation('f6'),
+                board.square_from_notation('g6'),
+                board.square_from_notation('h6'),
+                board.square_from_notation('e5'),
+                board.square_from_notation('e7'),
+                board.square_from_notation('e8')
+            }
+        )

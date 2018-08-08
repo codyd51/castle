@@ -112,7 +112,7 @@ class Board:
         moves: Set[Square] = set()
         # moves to the left
         for i in range(square.file - 1, -1, -1):
-            token: Square = self.squares[square.rank][i]
+            token: Square = self._squares[square.rank][i]
             if token.occupant is None:
                 moves.add(token)
             elif token.occupant.color is not square.occupant.color:
@@ -122,7 +122,7 @@ class Board:
                 break
         # moves to the right
         for i in range(square.file + 1, 8):
-            token: Square = self.squares[square.rank][i]
+            token: Square = self._squares[square.rank][i]
             if token.occupant is None:
                 moves.add(token)
             elif token.occupant.color is not square.occupant.color:
@@ -132,7 +132,7 @@ class Board:
                 break
         # moves up
         for i in range(square.rank + 1, 8):
-            token: Square = self.squares[i][square.file]
+            token: Square = self._squares[i][square.file]
             if token.occupant is None:
                 moves.add(token)
             elif token.occupant.color is not square.occupant.color:
@@ -142,7 +142,7 @@ class Board:
                 break
         # moves down
         for i in range(square.rank - 1, -1, -1):
-            token: Square = self.squares[i][square.file]
+            token: Square = self._squares[i][square.file]
             if token.occupant is None:
                 moves.add(token)
             elif token.occupant.color is not square.occupant.color:
