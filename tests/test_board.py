@@ -119,3 +119,34 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('e8')
             }
         )
+
+    def test_bishop_moves(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.BISHOP, Color.WHITE), 'c4')
+        board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'e6')
+        board.place_piece(Piece(PieceType.BISHOP, Color.WHITE), 'd3')
+        board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'd7')
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('c4')),
+            {
+                board.square_from_notation('a2'),
+                board.square_from_notation('b3'),
+                board.square_from_notation('b5'),
+                board.square_from_notation('a6'),
+                board.square_from_notation('d5'),
+                board.square_from_notation('e6')
+            }
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('e6')),
+            {
+                board.square_from_notation('d5'),
+                board.square_from_notation('c4'),
+                board.square_from_notation('f7'),
+                board.square_from_notation('g8'),
+                board.square_from_notation('f5'),
+                board.square_from_notation('g4'),
+                board.square_from_notation('h3')
+            }
+        )
+
