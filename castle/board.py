@@ -9,7 +9,7 @@ class InvalidChessNotationError(Exception):
 
 class Board:
     def __init__(self):
-        self.squares: List[List[Square]] = Board.construct_squares()
+        self._squares: List[List[Square]] = Board.construct_squares()
 
     @classmethod
     def construct_squares(cls) -> List[List[Square]]:
@@ -43,7 +43,7 @@ class Board:
         moves: List[Square] = []
         # moves to the left
         for i in range(square.file - 1, -1, -1):
-            token: Square = self.squares[i][square.rank]
+            token: Square = self._squares[i][square.rank]
             if token.occupant is None:
                 moves.append(token)
             elif token.occupant.color is not square.occupant.color:
@@ -53,7 +53,7 @@ class Board:
                 break
         # moves to the right
         for i in range(square.file + 1, 8):
-            token: Square = self.squares[i][square.rank]
+            token: Square = self._squares[i][square.rank]
             if token.occupant is None:
                 moves.append(token)
             elif token.occupant.color is not square.occupant.color:
@@ -63,7 +63,7 @@ class Board:
                 break
         # moves up
         for i in range(square.rank + 1, 8):
-            token: Square = self.squares[square.file][i]
+            token: Square = self._squares[square.file][i]
             if token.occupant is None:
                 moves.append(token)
             elif token.occupant.color is not square.occupant.color:
@@ -73,7 +73,7 @@ class Board:
                 break
         # moves down
         for i in range(square.rank - 1, -1, -1):
-            token: Square = self.squares[square.file][i]
+            token: Square = self._squares[square.file][i]
             if token.occupant is None:
                 moves.append(token)
             elif token.occupant.color is not square.occupant.color:
@@ -101,30 +101,60 @@ class Board:
 
         if file < 0 or file > 7 or rank < 0 or rank > 7:
             raise InvalidChessNotationError(f'{location}')
-        return self.squares[rank][file]
+        return self._squares[rank][file]
 
     def pretty_print(self):
         def pretty_print_piece(piece: Optional[Piece]):
             if not piece:
                 print('_', end='')
                 return
-            acronyms = {
-                PieceType.ROOK:     'R',
-                PieceType.KNIGHT:   'N',
-                PieceType.BISHOP:   'B',
-                PieceType.QUEEN:    'Q',
-                PieceType.KING:     'K',
-                PieceType.PAWN:     'P'
+            symbols = {
+                PieceType.ROOK:     ('♖', '♜'),
+                PieceType.KNIGHT:   ('♘', '♞'),
+                PieceType.BISHOP:   ('♗', '♝'),
+                PieceType.QUEEN:    ('♕', '♛'),
+                PieceType.KING:     ('♔', '♚'),
+                PieceType.PAWN:     ('♙', '♟')
             }
-            acronym = acronyms[piece.type]
-            if piece.color == Color.BLACK:
-                acronym = acronym.lower()
-            print(acronym, end='')
+            idx = 0 if piece.color == Color.WHITE else 1
+            symbol = symbols[piece.type][idx]
+            print(symbol, end='')
 
         print('_________________')
-        for rank in self.squares[::-1]:
+        for rank in self._squares[::-1]:
             print('|', end='')
             for square in rank:
                 pretty_print_piece(square.occupant)
                 print('|', end='')
             print()
+        print('‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾')
+
+    def squares_all(self):
+        for rank in self._squares:
+            for square in rank:
+                yield square
+        raise StopIteration
+
+    def squares_occupied(self):
+        for square in self.squares_all():
+            if square.occupant:
+                yield square
+        raise StopIteration
+
+    def squares_occupied_white(self):
+        for square in self.squares_occupied():
+            if square.occupant.color == Color.WHITE:
+                yield square
+        raise StopIteration
+
+    def squares_occupied_black(self):
+        for square in self.squares_occupied():
+            if square.occupant.color == Color.BLACK:
+                yield square
+        raise StopIteration
+
+    def squares_occupied_of_type(self, type: PieceType, color: Color):
+        for square in self.squares_occupied():
+            if square.occupant.type == type and square.occupant.color == color:
+                yield square
+        raise StopIteration
