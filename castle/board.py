@@ -87,6 +87,19 @@ class Board:
         square = self.square_from_notation(location)
         square.occupant = piece
 
+    def move_piece_to_square(self, from_square: Square, to_square: Square) -> None:
+        if to_square.occupant:
+            raise RuntimeError(f'is this a capture? {from_square} {to_square}')
+        to_square.occupant = from_square.occupant
+        from_square.occupant = None
+        # TODO(PT): test this method
+        # TODO(PT): this should also update defenders and attackers fields
+
+    def move_piece_to_location(self, from_square: Square, location: str) -> None:
+        # TODO(PT): test this method
+        dest_square = self.square_from_notation(location)
+        self.move_piece_to_square(from_square, dest_square)
+
     def square_from_notation(self, location: str) -> Square:
         letter = location[0]
         number = location[1]
