@@ -21,7 +21,7 @@ class Board:
                 board[rank].append(square)
         return board
 
-    def get_moves(self, square: Square):
+    def get_moves(self, square: Square) -> Set[Square]:
         if square.occupant.type is PieceType.PAWN:
             return self._get_pawn_moves(square)
         elif square.occupant.type is PieceType.KNIGHT:
