@@ -31,3 +31,15 @@ class BoardTests(unittest.TestCase):
             self.board.square_from_notation('aa')
         with self.assertRaises(InvalidChessNotationError):
             self.board.square_from_notation('===')
+
+    def test_board_construction(self):
+        for rank_idx in range(8):
+            rank = rank_idx + 1
+            for file_idx in range(8):
+                file = chr(ord('a') + file_idx)
+                notation = f'{file}{rank}'
+
+                square = self.board.squares[rank_idx][file_idx]
+                self.assertEqual(notation, square.__repr__())
+                self.assertEqual(file_idx, square.file)
+                self.assertEqual(rank_idx, square.rank)
