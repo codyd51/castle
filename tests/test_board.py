@@ -39,7 +39,7 @@ class BoardTests(unittest.TestCase):
                 file = chr(ord('a') + file_idx)
                 notation = f'{file}{rank}'
 
-                square = self.board.squares[rank_idx][file_idx]
+                square = self.board._squares[rank_idx][file_idx]
                 self.assertEqual(notation, square.__repr__())
                 self.assertEqual(file_idx, square.file)
                 self.assertEqual(rank_idx, square.rank)
@@ -53,3 +53,34 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(PieceType.ROOK, square.occupant.type)
         self.assertEqual(5, square.occupant.value)
         self.assertEqual(Color.BLACK, square.occupant.color)
+
+    def test_get_pawn_moves(self):
+        white_pawn = Piece(PieceType.PAWN, Color.WHITE)
+        black_pawn = Piece(PieceType.PAWN, Color.BLACK)
+        board = Board()
+        board.place_piece(white_pawn, 'd2')
+        board.place_piece(white_pawn, 'e2')
+        board.place_piece(black_pawn, 'b5')
+        board.place_piece(black_pawn, 'f3')
+        board.place_piece(black_pawn, 'd3')
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('b5')),
+            {board.square_from_notation('b4')}
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('f3')),
+            {board.square_from_notation('e2'), board.square_from_notation('f2')}
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('d3')),
+            {board.square_from_notation('e2')}
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('d2')),
+            set()
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('e2')),
+            {board.square_from_notation('e3'), board.square_from_notation('e4'),
+             board.square_from_notation('d3'), board.square_from_notation('f3')}
+        )
