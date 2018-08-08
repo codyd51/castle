@@ -1,5 +1,5 @@
 from typing import List
-from castle.board import Board
+from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
 
 
@@ -12,6 +12,7 @@ class Game:
         self.board = Board()
         self.pieces: List[Piece] = None
         self.place_pieces_for_new_game()
+        self.current_color = Color.WHITE
 
     def place_pieces_for_new_game(self):
         # white's pieces
@@ -59,7 +60,7 @@ class Game:
             destination = self.board.square_from_notation(player_move_str)
             # player must be moving a pawn
             # loop through every pawn and see if it's possible for it to move to the specified position
-            for square in self.board.squares_occupied_of_type(PieceType.PAWN, Color.WHITE):
+            for square in self.board.squares_occupied_of_type(PieceType.PAWN, self.current_color):
                 possible_moves = self.board.get_moves(square)
                 if destination in possible_moves:
                     # make a move!
@@ -69,10 +70,9 @@ class Game:
             piece_type = PieceType.type_from_symbol(player_move_str[0])
             destination_str = player_move_str[1:]
             destination = self.board.square_from_notation(destination_str)
-            for square in self.board.squares_occupied_of_type(piece_type, Color.WHITE):
+            for square in self.board.squares_occupied_of_type(piece_type, self.current_color):
                 possible_moves = self.board.get_moves(square)
                 if destination in possible_moves:
                     self.board.move_piece_to_square(square, destination)
                     return
-                pass
         raise InvalidMoveError(player_move_str)
