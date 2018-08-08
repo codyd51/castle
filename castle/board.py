@@ -35,7 +35,7 @@ class Board:
         elif square.occupant.type is PieceType.KING:
             pass
 
-    def _get_rook_moves(self, square: Square):
+    def _get_rook_moves(self, square: Square) -> List[Square]:
         """
         :param square: the origin of the rook
         :return: all possible squares the rook could move to in the current board state
@@ -43,26 +43,42 @@ class Board:
         moves: List[Square] = []
         # moves to the left
         for i in range(square.file - 1, -1, -1):
-            if self.squares[square.rank][i].occupant is None:
-                moves.append(self.squares[square.rank][i])
+            token: Square = self.squares[i][square.rank]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
             else:
                 break
         # moves to the right
         for i in range(square.file + 1, 8):
-            if self.squares[square.rank][i].occupant is None:
-                moves.append(self.squares[square.rank][i])
+            token: Square = self.squares[i][square.rank]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
             else:
                 break
         # moves up
         for i in range(square.rank + 1, 8):
-            if self.squares[i][square.file].occupant is None:
-                moves.append(self.squares[i][square.file])
+            token: Square = self.squares[square.file][i]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
             else:
                 break
         # moves down
         for i in range(square.rank - 1, -1, -1):
-            if self.squares[i][square.file].occupant is None:
-                moves.append(self.squares[i][square.file])
+            token: Square = self.squares[square.file][i]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
             else:
                 break
         return moves
