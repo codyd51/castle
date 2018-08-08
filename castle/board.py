@@ -21,6 +21,68 @@ class Board:
                 board[rank].append(square)
         return board
 
+    def get_moves(self, square: Square):
+        if square.occupant.type is PieceType.PAWN:
+            pass
+        elif square.occupant.type is PieceType.KNIGHT:
+            pass
+        elif square.occupant.type is PieceType.BISHOP:
+            pass
+        elif square.occupant.type is PieceType.ROOK:
+            return self._get_rook_moves(square)
+        elif square.occupant.type is PieceType.QUEEN:
+            pass
+        elif square.occupant.type is PieceType.KING:
+            pass
+
+    def _get_rook_moves(self, square: Square) -> List[Square]:
+        """
+        :param square: the origin of the rook
+        :return: all possible squares the rook could move to in the current board state
+        """
+        moves: List[Square] = []
+        # moves to the left
+        for i in range(square.file - 1, -1, -1):
+            token: Square = self.squares[i][square.rank]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
+            else:
+                break
+        # moves to the right
+        for i in range(square.file + 1, 8):
+            token: Square = self.squares[i][square.rank]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
+            else:
+                break
+        # moves up
+        for i in range(square.rank + 1, 8):
+            token: Square = self.squares[square.file][i]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
+            else:
+                break
+        # moves down
+        for i in range(square.rank - 1, -1, -1):
+            token: Square = self.squares[square.file][i]
+            if token.occupant is None:
+                moves.append(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.append(token)
+                break
+            else:
+                break
+        return moves
+
     def place_piece(self, piece: Piece, location: str) -> None:
         square = self.square_from_notation(location)
         square.occupant = piece
