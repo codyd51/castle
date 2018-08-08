@@ -17,7 +17,7 @@ class Board:
         for rank in range(8):
             board.append([])
             for file in range(8):
-                square = Square(file, rank)
+                square = Square(rank, file)
                 board[rank].append(square)
         return board
 
@@ -101,4 +101,4 @@ class Board:
 
         if file < 0 or file > 7 or rank < 0 or rank > 7:
             raise InvalidChessNotationError(f'{location}')
-        return self.squares[file][rank]
+        return self.squares[rank][file]
