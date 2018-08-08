@@ -14,6 +14,27 @@ class PieceType(Enum):
     QUEEN = 5
     KING = 6
 
+    _TYPE_TO_SYMBOL = {
+        PAWN:     'P',
+        KNIGHT:   'N',
+        BISHOP:   'B',
+        ROOK:     'R',
+        QUEEN:    'Q',
+        KING:     'K',
+    }
+    _SYMBOL_TO_TYPE = {
+        'P': PAWN,
+        'N': KNIGHT,
+        'B': BISHOP,
+        'R': ROOK,
+        'Q': QUEEN,
+        'K': KING
+    }
+
+    @classmethod
+    def type_from_symbol(cls, symbol: str) -> 'PieceType':
+        return cls._SYMBOL_TO_TYPE.value[symbol]
+
 
 class Piece:
     def __init__(self, type: PieceType, color: Color):
