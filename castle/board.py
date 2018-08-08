@@ -91,9 +91,48 @@ class Board:
         moves: Set[Square] = set()
         # moves to the upper-left
         for i in range(1, 8):
-            try:
+            if square.file - i >= 0 and square.rank + i <= 7:
                 token: Square = self._squares[square.rank + i][square.file - i]
-            except IndexError as ie:
+            else:
+                break
+            if token.occupant is None:
+                moves.add(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.add(token)
+                break
+            else:
+                break
+        # moves to the bottom-left
+        for i in range(1, 8):
+            if square.file - i >= 0 and square.rank - i >= 0:
+                token: Square = self._squares[square.rank - i][square.file - i]
+            else:
+                break
+            if token.occupant is None:
+                moves.add(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.add(token)
+                break
+            else:
+                break
+        # moves to the upper-right
+        for i in range(1, 8):
+            if square.file + i <= 7 and square.rank + i <= 7:
+                token: Square = self._squares[square.rank + i][square.file + i]
+            else:
+                break
+            if token.occupant is None:
+                moves.add(token)
+            elif token.occupant.color is not square.occupant.color:
+                moves.add(token)
+                break
+            else:
+                break
+        # moves to the bottom-right
+        for i in range(1, 8):
+            if square.file + i <= 7 and square.rank - i >= 0:
+                token: Square = self._squares[square.rank - i][square.file + i]
+            else:
                 break
             if token.occupant is None:
                 moves.add(token)
