@@ -3,6 +3,10 @@ from castle.board import Board
 from castle.piece import Piece, PieceType, Color
 
 
+class InvalidMoveError(Exception):
+    pass
+
+
 class Game:
     def __init__(self):
         self.board = Board()
@@ -45,3 +49,42 @@ class Game:
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'f7')
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'g7')
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'h7')
+
+    def play_turn(self):
+        # XXX(PT): for now, a turn always simply consists of performing a move from stdin
+        player_move_str = input('Enter a move: ')
+        # XXX(PT): this should later be refactored into a separate step for parsing once it's fleshed out
+        # check if they're moving a pawn or a named piece
+        if player_move_str[0].islower():
+            destination = self.board.square_from_notation(player_move_str)
+            # player must be moving a pawn
+            # loop through every pawn and see if it's possible for it to move to the specified position
+            for square in self.board.squares_occupied_of_type(PieceType.PAWN, Color.WHITE):
+                possible_moves = self.board.get_moves(square)
+                if destination in possible_moves:
+                    # make a move!
+                    self.board.move_piece_to_square(square, destination)
+                    return
+        else:
+            # TODO(PT): this belongs in PieceType
+            prefix_to_piece_type = {
+                'N': PieceType.KNIGHT,
+                'B': PieceType.BISHOP,
+                'R': PieceType.ROOK,
+                'Q': PieceType.QUEEN,
+                'K': PieceType.KING
+            }
+            piece_type_prefix = player_move_str[0]
+            if piece_type_prefix not in prefix_to_piece_type:
+                raise InvalidMoveError(player_move_str)
+
+            piece_type = prefix_to_piece_type[piece_type_prefix]
+            destination_str = player_move_str[1:]
+            destination = self.board.square_from_notation(destination_str)
+            for square in self.board.squares_occupied_of_type(piece_type, Color.WHITE):
+                possible_moves = self.board.get_moves(square)
+                if destination in possible_moves:
+                    self.board.move_piece_to_square(square, destination)
+                    return
+                pass
+        raise InvalidMoveError(player_move_str)
