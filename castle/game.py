@@ -66,19 +66,7 @@ class Game:
                     self.board.move_piece_to_square(square, destination)
                     return
         else:
-            # TODO(PT): this belongs in PieceType
-            prefix_to_piece_type = {
-                'N': PieceType.KNIGHT,
-                'B': PieceType.BISHOP,
-                'R': PieceType.ROOK,
-                'Q': PieceType.QUEEN,
-                'K': PieceType.KING
-            }
-            piece_type_prefix = player_move_str[0]
-            if piece_type_prefix not in prefix_to_piece_type:
-                raise InvalidMoveError(player_move_str)
-
-            piece_type = prefix_to_piece_type[piece_type_prefix]
+            piece_type = PieceType.type_from_symbol(player_move_str[0])
             destination_str = player_move_str[1:]
             destination = self.board.square_from_notation(destination_str)
             for square in self.board.squares_occupied_of_type(piece_type, Color.WHITE):
