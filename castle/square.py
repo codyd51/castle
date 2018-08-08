@@ -11,5 +11,5 @@ class Square:
         self.black_defenders: List[Square] = []
 
     def __repr__(self):
-        rank_values = 'abcdefgh'
-        return f'{rank_values[self.rank]}{self.file}'
+        file_values = 'abcdefgh'
+        return f'{file_values[self.file]}{self.rank}'
