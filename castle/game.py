@@ -86,6 +86,15 @@ class Game:
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'h7')
 
     def play_turn(self):
+        while True:
+            try:
+                self.player_move()
+            except InvalidMoveError:
+                print('Invalid move.')
+            except InvalidChessNotationError:
+                print('Invalid notation.')
+            break
+        self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         # XXX(PT): for now, a turn always simply consists of performing a move from stdin
         player_move_str = input('Enter a move: ')
         # XXX(PT): this should later be refactored into a separate step for parsing once it's fleshed out
