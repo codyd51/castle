@@ -150,3 +150,34 @@ class BoardTests(unittest.TestCase):
             }
         )
 
+    def test_knight_moves(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.KNIGHT, Color.WHITE), 'b6')
+        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'e4')
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'c3')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'd5')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'f6')
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('b6')),
+            {
+                board.square_from_notation('a8'),
+                board.square_from_notation('c8'),
+                board.square_from_notation('d7'),
+                board.square_from_notation('d5'),
+                board.square_from_notation('c4'),
+                board.square_from_notation('a4'),
+            }
+        )
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('e4')),
+            {
+                board.square_from_notation('d6'),
+                board.square_from_notation('g5'),
+                board.square_from_notation('g3'),
+                board.square_from_notation('f2'),
+                board.square_from_notation('d2'),
+                board.square_from_notation('c3'),
+                board.square_from_notation('c5')
+            }
+        )
+
