@@ -243,8 +243,6 @@ class Board:
         square.occupant = piece
 
     def move_piece_to_square(self, from_square: Square, to_square: Square) -> None:
-        if to_square.occupant:
-            raise RuntimeError(f'is this a capture? {from_square} {to_square}')
         to_square.occupant = from_square.occupant
         from_square.occupant = None
         # TODO(PT): test this method
@@ -311,31 +309,11 @@ class Board:
         for rank in self._squares:
             for square in rank:
                 yield square
-        raise StopIteration
 
     def squares_occupied(self):
         for square in self.squares_all():
             if square.occupant:
                 yield square
-        raise StopIteration
-
-    def squares_occupied_white(self):
-        for square in self.squares_occupied():
-            if square.occupant.color == Color.WHITE:
-                yield square
-        raise StopIteration
-
-    def squares_occupied_black(self):
-        for square in self.squares_occupied():
-            if square.occupant.color == Color.BLACK:
-                yield square
-        raise StopIteration
-
-    def squares_occupied_of_type(self, type: PieceType, color: Color):
-        for square in self.squares_occupied():
-            if square.occupant.type == type and square.occupant.color == color:
-                yield square
-        raise StopIteration
 
     def squares_matching_filter(self,
                                 type: Optional[PieceType] = None,
