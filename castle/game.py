@@ -21,7 +21,7 @@ class MoveParser:
         raise InvalidMoveError(dest_square_str)
 
     @staticmethod
-    def parse_move(board: Board, move: str, active_color: Color) -> Tuple[Square, Square]:
+    def parse_move(board: Board, active_color: Color, move: str) -> Tuple[Square, Square]:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
         """
         def squares_from_strings(from_notation: str, to_notation: str):
@@ -35,7 +35,7 @@ class MoveParser:
 
             # if this is a pawn capture, the from_square will only be the file that the pawn came from
             if len(from_square) == 1:
-                from_square = MoveParser._find_pawn_for_destination(board, to_square)
+                from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square)
             else:
                 raise RuntimeError('non-pawn capture')
             return squares_from_strings(from_square, to_square)
@@ -43,7 +43,7 @@ class MoveParser:
         # is it a pawn move? Pawn moves are only 2 characters long. DD
         if len(move) == 2:
             to_square = move
-            from_square = MoveParser._find_pawn_for_destination(board, to_square)
+            from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square)
             return squares_from_strings(from_square, to_square)
 
         # piece type will be the first character
@@ -55,7 +55,7 @@ class MoveParser:
                 # found the piece to move
                 return squares_from_strings(square.notation(), dest_square.notation())
 
-        raise RuntimeError(f'{active_color.name} cant perform {move}')
+        raise RuntimeError(f'{active_color.name} can\'t perform {move}')
 
 
 class Game:
@@ -106,12 +106,19 @@ class Game:
         while True:
             try:
                 self.player_move()
+                self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
             except InvalidMoveError:
                 print('Invalid move.')
             except InvalidChessNotationError:
                 print('Invalid notation.')
             break
-        self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
+
+    def player_move(self):
+        # XXX(PT): for now, a turn always simply consists of performing a move from stdin
+        player_move_str = input(f'{self.current_color.name}\'s move: ')
+        from_square, dest_square = MoveParser.parse_move(self.board, self.current_color, player_move_str)
+        self.board.move_piece_to_square(from_square, dest_square)
+
         # XXX(PT): for now, a turn always simply consists of performing a move from stdin
         player_move_str = input('Enter a move: ')
         # XXX(PT): this should later be refactored into a separate step for parsing once it's fleshed out
