@@ -6,15 +6,17 @@ from castle.move import Move, MoveParser, InvalidMoveError
 
 
 class Game:
-    def __init__(self):
+    def __init__(self) -> None:
         self.board = Board()
-        self.pieces: List[Piece] = None
-        self.place_pieces_for_new_game()
-        self.current_color = Color.WHITE
-
         self.moves: List[Move] = []
 
-    def place_pieces_for_new_game(self):
+        self.white_player = HumanPlayer(Color.WHITE)
+        self.black_player = RandomPlayer(Color.BLACK)
+        self.current_player = self.white_player
+
+        self.place_pieces_for_new_game()
+
+    def place_pieces_for_new_game(self) -> None:
         # white's pieces
         self.board.place_piece(Piece(PieceType.ROOK, Color.WHITE), 'a1')
         self.board.place_piece(Piece(PieceType.KNIGHT, Color.WHITE), 'b1')
@@ -51,18 +53,25 @@ class Game:
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'g7')
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'h7')
 
-    def play_turn(self):
-        while True:
+    def play_turn(self) -> None:
+        for i in range(3):
             try:
-                self.player_move()
+                move = self.current_player.play_move(self.board)
+                if type(move) == str:
+                    self.apply_notation(move)
+                elif type(move) == Move:
+                    self.apply_move(move)
+                else:
+                    raise RuntimeError(f'unknown move type {type(move)}')
                 self.pretty_print()
+                return
             except InvalidMoveError as e:
                 stripped_notation = str(e).strip('P')
                 print(f'Invalid move. {stripped_notation}.')
             except InvalidChessNotationError as e:
                 stripped_notation = str(e).strip('P')
                 print(f'Invalid notation. {stripped_notation}.')
-            break
+        raise RuntimeError(f'{self.current_player.color.name} provided invalid move 3 times.')
 
     def player_move(self):
         # XXX(PT): for now, a turn always simply consists of performing a move from stdin
