@@ -181,3 +181,34 @@ class BoardTests(unittest.TestCase):
             }
         )
 
+    def test_queen_moves(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'a2')
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'c6')
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'd2')
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'f7')
+        board.place_piece(Piece(PieceType.QUEEN, Color.WHITE), 'd5')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'b5')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'f3')
+        board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'g5')
+        self.assertEqual(
+            board.get_moves(board.square_from_notation('d5')),
+            {
+                board.square_from_notation('c5'),
+                board.square_from_notation('b5'),
+                board.square_from_notation('c4'),
+                board.square_from_notation('b3'),
+                board.square_from_notation('d4'),
+                board.square_from_notation('d3'),
+                board.square_from_notation('e4'),
+                board.square_from_notation('f3'),
+                board.square_from_notation('e5'),
+                board.square_from_notation('f5'),
+                board.square_from_notation('g5'),
+                board.square_from_notation('e6'),
+                board.square_from_notation('d6'),
+                board.square_from_notation('d7'),
+                board.square_from_notation('d8'),
+
+            }
+        )
