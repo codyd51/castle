@@ -342,7 +342,7 @@ class Board:
                                 color: Optional[Color] = None,
                                 rank: Optional[str] = None,
                                 file: Optional[str] = None):
-        for square in self.squares_all():
+        for square in self.squares_occupied():
             is_match = True
             if type and square.occupant.type != type:
                 is_match = False

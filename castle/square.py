@@ -20,6 +20,9 @@ class Square:
         file_values = 'abcdefgh'
         return file_values[idx]
 
-    def __repr__(self):
+    def notation(self):
         # ranks are 1-indexed
         return f'{Square.index_to_file(self.file)}{self.rank + 1}'
+
+    def __repr__(self):
+        return self.notation()

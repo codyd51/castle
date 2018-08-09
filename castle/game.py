@@ -19,7 +19,7 @@ class MoveParser:
             possible_source = board.square_from_notation(f'{Square.index_to_file(file)}{rank-i}')
             if possible_source.occupant and possible_source.occupant.type == PieceType.PAWN:
                 # found the source piece
-                return possible_source.__repr__()
+                return possible_source.notation()
         raise RuntimeError(f'couldn\'t find pawn that can move to {dest_square}')
 
     @staticmethod
