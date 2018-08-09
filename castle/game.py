@@ -84,6 +84,8 @@ class Game:
         self.place_pieces_for_new_game()
         self.current_color = Color.WHITE
 
+        self.moves: List[Move] = []
+
     def place_pieces_for_new_game(self):
         # white's pieces
         self.board.place_piece(Piece(PieceType.ROOK, Color.WHITE), 'a1')
@@ -135,10 +137,12 @@ class Game:
 
     def player_move(self):
         # XXX(PT): for now, a turn always simply consists of performing a move from stdin
-        player_move_str = input(f'{self.current_color.name}\'s move: ')
+        player_move_str = input(f'{self.current_color.name.title()}\'s move: ')
         self.apply_move(player_move_str)
 
-    def apply_move(self, move: str):
-        from_square, dest_square = MoveParser.parse_move(self.board, self.current_color, move)
-        self.board.move_piece_to_square(from_square, dest_square)
+    def apply_move(self, move_str: str):
+        move = MoveParser.parse_move(self.board, self.current_color, move_str)
+        self.board.move_piece_to_square(move.from_square, move.to_square)
         self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
+        self.moves.append(move)
+
