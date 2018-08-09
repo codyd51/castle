@@ -115,9 +115,11 @@ class Game:
             try:
                 self.player_move()
             except InvalidMoveError as e:
-                print(f'Invalid move. {str(e)}.')
+                stripped_notation = str(e).strip('P')
+                print(f'Invalid move. {stripped_notation}.')
             except InvalidChessNotationError as e:
-                print(f'Invalid notation. {str(e)}.')
+                stripped_notation = str(e).strip('P')
+                print(f'Invalid notation. {stripped_notation}.')
             break
 
     def player_move(self):
