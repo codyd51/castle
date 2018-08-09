@@ -260,8 +260,11 @@ class Board:
         file = ord(letter) - ord('a')
         rank = int(location[1]) - 1
 
+        return self.square_from_coord(rank, file)
+
+    def square_from_coord(self, rank: int, file: int) -> Square:
         if file < 0 or file > 7 or rank < 0 or rank > 7:
-            raise InvalidChessNotationError(f'{location}')
+            raise InvalidChessNotationError(f'({rank},{file})')
         return self._squares[rank][file]
 
     def piece_from_notation(self, location: str) -> Optional[Piece]:
