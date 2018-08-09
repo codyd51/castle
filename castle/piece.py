@@ -33,6 +33,9 @@ class PieceType(Enum):
 
     @classmethod
     def type_from_symbol(cls, symbol: str) -> 'PieceType':
+        if symbol not in cls._SYMBOL_TO_TYPE.value:
+            from castle.board import InvalidChessNotationError
+            raise InvalidChessNotationError(f'{symbol} is not a piece abbreviation')
         return PieceType(cls._SYMBOL_TO_TYPE.value[symbol])
 
 
