@@ -54,9 +54,16 @@ class MoveParser:
             moves = board.get_moves(square)
             if dest_square in moves:
                 # found the piece to move
-                return squares_from_strings(square.notation(), dest_square.notation())
+                pieces_fulfilling_source_square_requirements.append(square)
+        # if there were multiple pieces matching all the necessary criteria to perform the provided notation,
+        # then the notation is invalid and must contain the source square's file
+        if len(pieces_fulfilling_source_square_requirements) > 1:
+            raise InvalidChessNotationError(f'Ambiguous move: {move}')
+        elif len(pieces_fulfilling_source_square_requirements) == 1:
+            source_square = pieces_fulfilling_source_square_requirements[0]
+            return squares_from_strings(source_square.notation(), dest_square.notation())
 
-        raise RuntimeError(f'{active_color.name} can\'t perform {move}')
+        raise InvalidMoveError(move)
 
 
 class Game:
