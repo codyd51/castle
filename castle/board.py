@@ -42,45 +42,34 @@ class Board:
         """
         moves: Set[Square] = set()
         if square.occupant.color is Color.WHITE:
-            # Moves forward
-            if self._squares[square.rank + 1][square.file].occupant is None:
-                moves.add(self._squares[square.rank + 1][square.file])
-                if square.rank == 1 and self._squares[3][square.file].occupant is None:
-                    moves.add(self._squares[3][square.file])
-            # Left diagonal captures
-            if square.file == 0:
-                token = None
-            else:
-                token = self._squares[square.rank + 1][square.file - 1]
-            if token and token.occupant and token.occupant.color == Color.BLACK:
-                moves.add(token)
-            # Right diagonal captures
-            if square.file == 7:
-                token = None
-            else:
-                token = self._squares[square.rank + 1][square.file + 1]
-            if token and token.occupant and token.occupant.color == Color.BLACK:
-                moves.add(token)
-        if square.occupant.color is Color.BLACK:
-            # Moves forward
-            if self._squares[square.rank - 1][square.file].occupant is None:
-                moves.add(self._squares[square.rank - 1][square.file])
-                if square.rank == 6 and self._squares[4][square.file].occupant is None:
-                    moves.add(self._squares[4][square.file])
-            # Left diagonal captures
-            if square.file == 0:
-                token = None
-            else:
-                token = self._squares[square.rank - 1][square.file - 1]
-            if token and token.occupant and token.occupant.color == Color.WHITE:
-                moves.add(token)
-            # Right diagonal captures
-            if square.file == 7:
-                token = None
-            else:
-                token = self._squares[square.rank - 1][square.file + 1]
-            if token and token.occupant and token.occupant.color == Color.WHITE:
-                moves.add(token)
+            forward = 1
+            first_rank = 1
+        else:
+            forward = -1
+            first_rank = 6
+
+        # Moves forward
+        if self._squares[square.rank + forward][square.file].occupant is None:
+            moves.add(self._squares[square.rank + forward][square.file])
+            # Special case in pawn movement, where they can advance for two spaces if they are on their starting row
+            if square.rank == first_rank and self._squares[first_rank + 2 * forward][square.file].occupant is None:
+                moves.add(self._squares[first_rank + 2 * forward][square.file])
+
+        # Left diagonal captures
+        if square.file == 0:
+            token = None
+        else:
+            token = self._squares[square.rank + forward][square.file - 1]
+        if token and token.occupant and token.occupant.color != square.occupant.color:
+            moves.add(token)
+            
+        # Right diagonal captures
+        if square.file == 7:
+            token = None
+        else:
+            token = self._squares[square.rank + forward][square.file + 1]
+        if token and token.occupant and token.occupant.color != square.occupant.color:
+            moves.add(token)
         return moves
 
     def _get_bishop_moves(self, square: Square) -> Set[Square]:
