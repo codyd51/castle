@@ -112,7 +112,6 @@ class Game:
         while True:
             try:
                 self.player_move()
-                self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
             except InvalidMoveError:
                 print('Invalid move.')
             except InvalidChessNotationError:
@@ -122,32 +121,9 @@ class Game:
     def player_move(self):
         # XXX(PT): for now, a turn always simply consists of performing a move from stdin
         player_move_str = input(f'{self.current_color.name}\'s move: ')
-        from_square, dest_square = MoveParser.parse_move(self.board, self.current_color, player_move_str)
-        self.board.move_piece_to_square(from_square, dest_square)
+        self.apply_move(player_move_str)
 
-        # XXX(PT): for now, a turn always simply consists of performing a move from stdin
-        player_move_str = input('Enter a move: ')
-        # XXX(PT): this should later be refactored into a separate step for parsing once it's fleshed out
-        # check if they're moving a pawn or a named piece
-        if player_move_str[0].islower():
-            destination = self.board.square_from_notation(player_move_str)
-            # player must be moving a pawn
-            # loop through every pawn and see if it's possible for it to move to the specified position
-            for square in self.board.squares_occupied_of_type(PieceType.PAWN, self.current_color):
-                possible_moves = self.board.get_moves(square)
-                print(f'Possible {square} {PieceType.PAWN.name} moves: {possible_moves}')
-                if destination in possible_moves:
-                    # make a move!
-                    self.board.move_piece_to_square(square, destination)
-                    return
-        else:
-            piece_type = PieceType.type_from_symbol(player_move_str[0])
-            destination_str = player_move_str[1:]
-            destination = self.board.square_from_notation(destination_str)
-            for square in self.board.squares_occupied_of_type(piece_type, self.current_color):
-                possible_moves = self.board.get_moves(square)
-                print(f'Possible {square} {piece_type.name} moves: {possible_moves}')
-                if destination in possible_moves:
-                    self.board.move_piece_to_square(square, destination)
-                    return
-        raise InvalidMoveError(player_move_str)
+    def apply_move(self, move: str):
+        from_square, dest_square = MoveParser.parse_move(self.board, self.current_color, move)
+        self.board.move_piece_to_square(from_square, dest_square)
+        self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
