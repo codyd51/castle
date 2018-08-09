@@ -344,3 +344,5 @@ class Board:
 
             if is_match:
                 yield square
+
+    # TODO(PT): add is_in_check()
