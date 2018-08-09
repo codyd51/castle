@@ -29,28 +29,28 @@ class MoveParser:
             to_square = board.square_from_notation(to_square_str)
             print(f'Capture from {from_square} to {to_square}')
 
-            # if a pawn is capturing, the first letter will be lowercase and will indicate the source file
-            if from_square[0].islower():
-                from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square_str)
-            else:
-                from_type = PieceType.type_from_symbol(from_square[0])
-                # there should be exactly one source square
-                from_square = list(board.squares_matching_filter(type=from_type,
-                                                                 color=active_color,
-                                                                 can_reach_square=to_square))[0]
-                from_square = from_square.notation()
+            from_type = PieceType.type_from_symbol(from_square[0])
+            from_squares = list(board.squares_matching_filter(type=from_type,
+                                                              color=active_color,
+                                                              can_reach_square=to_square))
+            # there should be exactly one source square
+            if len(from_squares) != 1:
+                raise InvalidMoveError(move)
+            from_square = from_squares[0].notation()
             return squares_from_strings(from_square, to_square_str)
-
-        # is it a pawn move? Pawn moves are only 2 characters long. DD
-        if len(move) == 2:
-            to_square = move
-            from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square)
-            return squares_from_strings(from_square, to_square)
 
         # piece type will be the first character
         piece_type = PieceType.type_from_symbol(move[0])
-        dest_square = board.square_from_notation(move[1:])
-        for square in board.squares_matching_filter(type=piece_type, color=active_color):
+        # if the total move is >= 4 characters, then the second character specifies the file of the source piece (Ned6)
+        if len(move) >= 4:
+            from_file = move[1]
+            dest_square = board.square_from_notation(move[2:])
+        else:
+            from_file = None
+            dest_square = board.square_from_notation(move[1:])
+
+        pieces_fulfilling_source_square_requirements: List[Square] = []
+        for square in board.squares_matching_filter(type=piece_type, color=active_color, file_str=from_file):
             moves = board.get_moves(square)
             if dest_square in moves:
                 # found the piece to move
