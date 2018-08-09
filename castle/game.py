@@ -10,22 +10,16 @@ class InvalidMoveError(Exception):
 
 class MoveParser:
     @staticmethod
-    def _find_pawn_for_destination(board: Board, color: Color, dest_square_str: str) -> str:
-        dest_square = board.square_from_notation(dest_square_str)
-        file = dest_square.file
-        # the source square must be in the same file as the destination square
-        for square in board.squares_matching_filter(type=PieceType.PAWN, color=color, file=file):
-            possible_moves = board.get_moves(square)
-            if dest_square in possible_moves:
-                return square.notation()
-        raise InvalidMoveError(dest_square_str)
-
-    @staticmethod
     def parse_move(board: Board, active_color: Color, move: str) -> Tuple[Square, Square]:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
         """
         def squares_from_strings(from_notation: str, to_notation: str):
             return board.square_from_notation(from_notation), board.square_from_notation(to_notation)
+
+        # if a pawn is being moved, prepend a P to the notation string so pawn movements are internally
+        # consistent with other piece's movement. This is so all pieces can be handled with the same logic.
+        if move[0].islower():
+            move = f'P{move}'
 
         # is it a capture? SxDD
         if 'x' in move:
