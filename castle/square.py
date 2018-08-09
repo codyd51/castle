@@ -10,6 +10,11 @@ class Square:
         self.white_defenders: List[Square] = []
         self.black_defenders: List[Square] = []
 
+    @staticmethod
+    def file_to_index(file: str):
+        # TODO(PT): replace usage throughout project with this
+        return ord(file) - ord('a')
+
     def __repr__(self):
         file_values = 'abcdefgh'
         # ranks are 1-indexed

@@ -33,7 +33,7 @@ class PieceType(Enum):
 
     @classmethod
     def type_from_symbol(cls, symbol: str) -> 'PieceType':
-        return cls._SYMBOL_TO_TYPE.value[symbol]
+        return PieceType(cls._SYMBOL_TO_TYPE.value[symbol])
 
 
 class Piece:

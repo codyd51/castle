@@ -333,3 +333,22 @@ class Board:
             if square.occupant.type == type and square.occupant.color == color:
                 yield square
         raise StopIteration
+
+    def squares_matching_filter(self,
+                                type: Optional[PieceType] = None,
+                                color: Optional[Color] = None,
+                                rank: Optional[str] = None,
+                                file: Optional[str] = None):
+        for square in self.squares_all():
+            is_match = True
+            if type and square.occupant.type != type:
+                is_match = False
+            if color and square.occupant.color != color:
+                is_match = False
+            if rank and square.rank != rank:
+                is_match = False
+            if file and square.file != file:
+                is_match = False
+            if is_match:
+                yield square
+        raise StopIteration
