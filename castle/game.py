@@ -10,17 +10,15 @@ class InvalidMoveError(Exception):
 
 class MoveParser:
     @staticmethod
-    def _find_pawn_for_destination(board: Board, dest_square: str) -> str:
-        # the from square is either 1 or 2 squares below the destination square
-        rank = int(dest_square[1])
-        file = Square.file_to_index(dest_square[0])
-        for i in range(1, 3):
-            # check if there's a pawn at this square
-            possible_source = board.square_from_notation(f'{Square.index_to_file(file)}{rank-i}')
-            if possible_source.occupant and possible_source.occupant.type == PieceType.PAWN:
-                # found the source piece
-                return possible_source.notation()
-        raise RuntimeError(f'couldn\'t find pawn that can move to {dest_square}')
+    def _find_pawn_for_destination(board: Board, color: Color, dest_square_str: str) -> str:
+        dest_square = board.square_from_notation(dest_square_str)
+        file = dest_square.file
+        # the source square must be in the same file as the destination square
+        for square in board.squares_matching_filter(type=PieceType.PAWN, color=color, file=file):
+            possible_moves = board.get_moves(square)
+            if dest_square in possible_moves:
+                return square.notation()
+        raise InvalidMoveError(dest_square_str)
 
     @staticmethod
     def parse_move(board: Board, move: str, active_color: Color) -> Tuple[Square, Square]:
