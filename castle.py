@@ -6,7 +6,7 @@ def main():
     g.board.pretty_print()
     while True:
         g.play_turn()
-        g.board.pretty_print()
+
 
 
 if __name__ == '__main__':
