@@ -343,7 +343,8 @@ class Board:
                                 rank: Optional[int] = None,
                                 file: Optional[int] = None,
                                 rank_str: Optional[str] = None,
-                                file_str: Optional[str] = None):
+                                file_str: Optional[str] = None,
+                                can_reach_square: Optional[Square] = None):
         for square in self.squares_occupied():
             is_match = True
             if type and square.occupant.type != type:
@@ -358,7 +359,10 @@ class Board:
                 is_match = False
             if file_str and file_str != Square.index_to_file(square.file):
                 is_match = False
+            if can_reach_square:
+                moves = self.get_moves(square)
+                if can_reach_square not in moves:
+                    is_match = False
 
             if is_match:
                 yield square
-        raise StopIteration
