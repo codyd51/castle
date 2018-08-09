@@ -73,18 +73,16 @@ class Game:
                 print(f'Invalid notation. {stripped_notation}.')
         raise RuntimeError(f'{self.current_player.color.name} provided invalid move 3 times.')
 
-    def player_move(self):
-        # XXX(PT): for now, a turn always simply consists of performing a move from stdin
-        player_move_str = input(f'{self.current_color.name.title()}\'s move: ')
-        self.apply_move(player_move_str)
+    def apply_notation(self, move_str: str) -> None:
+        move = MoveParser.parse_move(self.board, self.current_player.color, move_str)
+        self.apply_move(move)
 
-    def apply_move(self, move_str: str):
-        move = MoveParser.parse_move(self.board, self.current_color, move_str)
+    def apply_move(self, move: Move) -> None:
         self.board.move_piece_to_square(move.from_square, move.to_square)
-        self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         self.moves.append(move)
+        self.current_player = self.white_player if self.current_player == self.black_player else self.black_player
 
-    def pretty_print(self):
+    def pretty_print(self) -> None:
         self.board.pretty_print()
         it = iter(self.moves)
         turn = 1
