@@ -62,6 +62,7 @@ class Game:
             # loop through every pawn and see if it's possible for it to move to the specified position
             for square in self.board.squares_occupied_of_type(PieceType.PAWN, self.current_color):
                 possible_moves = self.board.get_moves(square)
+                print(f'Possible {square} {PieceType.PAWN.name} moves: {possible_moves}')
                 if destination in possible_moves:
                     # make a move!
                     self.board.move_piece_to_square(square, destination)
@@ -72,6 +73,7 @@ class Game:
             destination = self.board.square_from_notation(destination_str)
             for square in self.board.squares_occupied_of_type(piece_type, self.current_color):
                 possible_moves = self.board.get_moves(square)
+                print(f'Possible {square} {piece_type.name} moves: {possible_moves}')
                 if destination in possible_moves:
                     self.board.move_piece_to_square(square, destination)
                     return
