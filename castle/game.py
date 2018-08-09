@@ -1,10 +1,44 @@
-from typing import List
+from typing import List, Tuple
 from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
+from castle.square import Square
 
 
 class InvalidMoveError(Exception):
     pass
+
+
+class MoveParser:
+    @staticmethod
+    def _find_pawn_for_destination(board: Board, dest_square: str) -> str:
+        # the from square is either 1 or 2 squares below the destination square
+        rank = int(dest_square[1])
+        file = Square.file_to_index(dest_square[0])
+        for i in range(1, 3):
+            # check if there's a pawn at this square
+            possible_source = board.square_from_notation(f'{Square.index_to_file(file)}{rank-i}')
+            if possible_source.occupant and possible_source.occupant.type == PieceType.PAWN:
+                # found the source piece
+                return possible_source.__repr__()
+        raise RuntimeError(f'couldn\'t find pawn that can move to {dest_square}')
+
+    @staticmethod
+    def parse_move(board: Board, move: str) -> Tuple[Square, Square]:
+        """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
+        """
+        # is it a capture? SxDD
+        if 'x' in move:
+            from_square = move[:move.find('x')]
+            to_square = move[move.find('x')+1:]
+            print(f'Capture from {from_square} to {to_square}')
+        else:
+            # is it a pawn move? Pawn moves are only 2 characters long. DD
+            if len(move) == 2:
+                to_square = move
+                from_square = MoveParser._find_pawn_for_destination(board, to_square)
+            else:
+                raise RuntimeError(f'cant parse {move}')
+        return board.square_from_notation(from_square), board.square_from_notation(to_square)
 
 
 class Game:
