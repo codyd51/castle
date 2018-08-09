@@ -23,22 +23,41 @@ class MoveParser:
         raise RuntimeError(f'couldn\'t find pawn that can move to {dest_square}')
 
     @staticmethod
-    def parse_move(board: Board, move: str) -> Tuple[Square, Square]:
+    def parse_move(board: Board, move: str, active_color: Color) -> Tuple[Square, Square]:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
         """
+        def squares_from_strings(from_notation: str, to_notation: str):
+            return board.square_from_notation(from_notation), board.square_from_notation(to_notation)
+
         # is it a capture? SxDD
         if 'x' in move:
             from_square = move[:move.find('x')]
             to_square = move[move.find('x')+1:]
             print(f'Capture from {from_square} to {to_square}')
-        else:
-            # is it a pawn move? Pawn moves are only 2 characters long. DD
-            if len(move) == 2:
-                to_square = move
+
+            # if this is a pawn capture, the from_square will only be the file that the pawn came from
+            if len(from_square) == 1:
                 from_square = MoveParser._find_pawn_for_destination(board, to_square)
             else:
-                raise RuntimeError(f'cant parse {move}')
-        return board.square_from_notation(from_square), board.square_from_notation(to_square)
+                raise RuntimeError('non-pawn capture')
+            return squares_from_strings(from_square, to_square)
+
+        # is it a pawn move? Pawn moves are only 2 characters long. DD
+        if len(move) == 2:
+            to_square = move
+            from_square = MoveParser._find_pawn_for_destination(board, to_square)
+            return squares_from_strings(from_square, to_square)
+
+        # piece type will be the first character
+        piece_type = PieceType.type_from_symbol(move[0])
+        dest_square = board.square_from_notation(move[1:])
+        for square in board.squares_matching_filter(type=piece_type, color=active_color):
+            moves = board.get_moves(square)
+            if dest_square in moves:
+                # found the piece to move
+                return squares_from_strings(square.notation(), dest_square.notation())
+
+        raise RuntimeError(f'{active_color.name} cant perform {move}')
 
 
 class Game:
