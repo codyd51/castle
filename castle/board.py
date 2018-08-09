@@ -25,7 +25,7 @@ class Board:
         if square.occupant.type is PieceType.PAWN:
             return self._get_pawn_moves(square)
         elif square.occupant.type is PieceType.KNIGHT:
-            pass
+            return self._get_knight_moves(square)
         elif square.occupant.type is PieceType.BISHOP:
             return self._get_bishop_moves(square)
         elif square.occupant.type is PieceType.ROOK:
@@ -62,7 +62,7 @@ class Board:
             token = self._squares[square.rank + forward][square.file - 1]
         if token and token.occupant and token.occupant.color != square.occupant.color:
             moves.add(token)
-            
+
         # Right diagonal captures
         if square.file == 7:
             token = None
@@ -70,6 +70,57 @@ class Board:
             token = self._squares[square.rank + forward][square.file + 1]
         if token and token.occupant and token.occupant.color != square.occupant.color:
             moves.add(token)
+        return moves
+
+    def _get_knight_moves(self, square: Square) -> Set[Square]:
+        """
+        :param square: the origin of the knight
+        :return: all possible squares the knight could move to in the current board state
+        """
+        moves: Set[Square] = set()
+        # Moves upwards
+        if square.rank <= 5:
+            if square.file >= 1:
+                token = self._squares[square.rank + 2][square.file - 1]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+            if square.file <= 6:
+                token = self._squares[square.rank + 2][square.file + 1]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+
+        # Moves downwards
+        if square.rank >= 2:
+            if square.file >= 1:
+                token = self._squares[square.rank - 2][square.file - 1]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+            if square.file <= 6:
+                token = self._squares[square.rank - 2][square.file + 1]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+
+        # Moves to the left
+        if square.file >= 2:
+            if square.rank >= 1:
+                token = self._squares[square.rank - 1][square.file - 2]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+            if square.rank <= 6:
+                token = self._squares[square.rank + 1][square.file - 2]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+
+        # Moves to the right
+        if square.file <= 5:
+            if square.rank >= 1:
+                token = self._squares[square.rank - 1][square.file + 2]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
+            if square.rank <= 6:
+                token = self._squares[square.rank + 1][square.file + 2]
+                if not (token.occupant and token.occupant.color is square.occupant.color):
+                    moves.add(token)
         return moves
 
     def _get_bishop_moves(self, square: Square) -> Set[Square]:
