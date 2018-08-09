@@ -30,15 +30,21 @@ class MoveParser:
         # is it a capture? SxDD
         if 'x' in move:
             from_square = move[:move.find('x')]
-            to_square = move[move.find('x')+1:]
+            to_square_str = move[move.find('x')+1:]
+            to_square = board.square_from_notation(to_square_str)
             print(f'Capture from {from_square} to {to_square}')
 
-            # if this is a pawn capture, the from_square will only be the file that the pawn came from
-            if len(from_square) == 1:
-                from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square)
+            # if a pawn is capturing, the first letter will be lowercase and will indicate the source file
+            if from_square[0].islower():
+                from_square = MoveParser._find_pawn_for_destination(board, active_color, to_square_str)
             else:
-                raise RuntimeError('non-pawn capture')
-            return squares_from_strings(from_square, to_square)
+                from_type = PieceType.type_from_symbol(from_square[0])
+                # there should be exactly one source square
+                from_square = list(board.squares_matching_filter(type=from_type,
+                                                                 color=active_color,
+                                                                 can_reach_square=to_square))[0]
+                from_square = from_square.notation()
+            return squares_from_strings(from_square, to_square_str)
 
         # is it a pawn move? Pawn moves are only 2 characters long. DD
         if len(move) == 2:
