@@ -127,6 +127,7 @@ class Game:
         while True:
             try:
                 self.player_move()
+                self.pretty_print()
             except InvalidMoveError as e:
                 stripped_notation = str(e).strip('P')
                 print(f'Invalid move. {stripped_notation}.')
@@ -146,3 +147,16 @@ class Game:
         self.current_color = Color.WHITE if self.current_color == Color.BLACK else Color.BLACK
         self.moves.append(move)
 
+    def pretty_print(self):
+        self.board.pretty_print()
+        it = iter(self.moves)
+        turn = 1
+        for move1 in it:
+            print(f'{turn}. {move1.notation} ', end='')
+            try:
+                move2 = next(it)
+                print(f'{move2.notation} ', end='')
+            except StopIteration:
+                pass
+            turn += 1
+        print()
