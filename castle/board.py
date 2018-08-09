@@ -31,7 +31,7 @@ class Board:
         elif square.occupant.type is PieceType.ROOK:
             return self._get_rook_moves(square)
         elif square.occupant.type is PieceType.QUEEN:
-            pass
+            return self._get_queen_moves(square)
         elif square.occupant.type is PieceType.KING:
             pass
 
@@ -230,6 +230,13 @@ class Board:
             else:
                 break
         return moves
+
+    def _get_queen_moves(self, square: Square) -> Set[Square]:
+        """
+        :param square: the origin of the queen
+        :return: all possible _squares the queen could move to in the current board state
+        """
+        return self._get_bishop_moves(square) | self._get_rook_moves(square)
 
     def place_piece(self, piece: Piece, location: str) -> None:
         square = self.square_from_notation(location)
