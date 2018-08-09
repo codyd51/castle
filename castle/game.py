@@ -29,6 +29,7 @@ class MoveParser:
 
         # is it a capture? SxDD
         if 'x' in move:
+            # TODO(PT): add support for Nexd6
             from_square = move[:move.find('x')]
             to_square_str = move[move.find('x')+1:]
             to_square = board.square_from_notation(to_square_str)
@@ -112,10 +113,10 @@ class Game:
         while True:
             try:
                 self.player_move()
-            except InvalidMoveError:
-                print('Invalid move.')
-            except InvalidChessNotationError:
-                print('Invalid notation.')
+            except InvalidMoveError as e:
+                print(f'Invalid move. {str(e)}.')
+            except InvalidChessNotationError as e:
+                print(f'Invalid notation. {str(e)}.')
             break
 
     def player_move(self):
