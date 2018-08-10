@@ -17,6 +17,18 @@ class Move:
 
 
 class MoveParser:
+    @classmethod
+    def notation_from_move(cls, move: Move):
+        notation = f''
+        notation += PieceType.symbol_from_type(move.from_square.occupant.type)
+        notation += Square.index_to_file(move.from_square.file)
+        if move.is_capture:
+            notation += 'x'
+        notation += move.to_square.notation()
+        # internally MoveParser will prepend P to pawn moves; clean it up.
+        notation = notation.strip('P')
+        return notation
+
     @staticmethod
     def parse_move(board: Board, active_color: Color, move_str: str) -> Move:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
@@ -74,5 +86,3 @@ class MoveParser:
             return move
 
         raise InvalidMoveError(move_str)
-
-
