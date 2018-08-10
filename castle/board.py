@@ -33,12 +33,13 @@ class Board:
         elif square.occupant.type is PieceType.QUEEN:
             return self._get_queen_moves(square)
         elif square.occupant.type is PieceType.KING:
+            return set()
             pass
 
     def _get_pawn_moves(self, square: Square) -> Set[Square]:
         """
-        :param square: the origin of the bishop
-        :return: all possible squares the bishop could move to in the current board state
+        :param square: the origin of the pawn
+        :return: all possible squares the pawn could move to in the current board state
         """
         moves: Set[Square] = set()
         if square.occupant.color is Color.WHITE:

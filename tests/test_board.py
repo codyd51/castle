@@ -212,3 +212,8 @@ class BoardTests(unittest.TestCase):
 
             }
         )
+
+    def test_pawn_pushed_forward(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'a8')
+        board.get_moves(board.square_from_notation('a8'))
