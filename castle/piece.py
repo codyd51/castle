@@ -38,6 +38,10 @@ class PieceType(Enum):
             raise InvalidChessNotationError(f'{symbol} is not a piece abbreviation')
         return PieceType(cls._SYMBOL_TO_TYPE.value[symbol])
 
+    @classmethod
+    def symbol_from_type(cls, piece_type: 'PieceType') -> str:
+        return cls._TYPE_TO_SYMBOL.value[piece_type.value]
+
 
 class Piece:
     def __init__(self, type: PieceType, color: Color):

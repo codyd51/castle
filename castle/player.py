@@ -1,10 +1,16 @@
-from typing import Tuple, List, Set, Union
 import random
+from enum import Enum
+from typing import Tuple, List, Set, Union
 
 from castle.piece import Color
 from castle.board import Board
 from castle.square import Square
 from castle.move import Move, MoveParser
+
+
+class PlayerType(Enum):
+    HUMAN = 0
+    COMPUTER = 1
 
 
 class Player:

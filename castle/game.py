@@ -1,20 +1,27 @@
 from typing import List
+
 from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
 from castle.player import HumanPlayer, RandomPlayer
 from castle.move import Move, MoveParser, InvalidMoveError
+from castle.player import PlayerType
 
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, player1: PlayerType, player2: PlayerType) -> None:
         self.board = Board()
         self.moves: List[Move] = []
-
-        self.white_player = HumanPlayer(Color.WHITE)
-        self.black_player = RandomPlayer(Color.BLACK)
-        self.current_player = self.white_player
-
         self.place_pieces_for_new_game()
+
+        if player1 == PlayerType.HUMAN:
+            self.white_player = HumanPlayer(Color.WHITE)
+        else:
+            self.white_player = RandomPlayer(Color.WHITE)
+        if player2 == PlayerType.HUMAN:
+            self.black_player = HumanPlayer(Color.BLACK)
+        else:
+            self.black_player = RandomPlayer(Color.BLACK)
+        self.current_player = self.white_player
 
     def place_pieces_for_new_game(self) -> None:
         # white's pieces
