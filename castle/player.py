@@ -10,17 +10,17 @@ from castle.move import Move
 class Player:
     def __init__(self, color: Color):
         self.color = color
-        self.title: str = None
+        self.name: str = None
 
     def play_move(self, board: Board) -> Union[str, Move]:
-        print(f'{self.color.name.title()}\'s move ({self.title}): ', end='')
+        print(f'{self.color.name.title()}\'s move ({self.name}): ', end='')
         return ''
 
 
 class HumanPlayer(Player):
     def __init__(self, color: Color):
         super(HumanPlayer, self).__init__(color)
-        self.title = 'Player'
+        self.name = 'Player'
 
     def play_move(self, board: Board) -> str:
         super(HumanPlayer, self).play_move(board)
@@ -32,7 +32,7 @@ class HumanPlayer(Player):
 class RandomPlayer(Player):
     def __init__(self, color: Color):
         super(RandomPlayer, self).__init__(color)
-        self.title = 'Computer'
+        self.name = 'Computer'
 
     def play_move(self, board: Board) -> Move:
         super(RandomPlayer, self).play_move(board)
