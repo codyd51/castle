@@ -244,10 +244,19 @@ class Board:
         square.occupant = piece
 
     def move_piece_to_square(self, from_square: Square, to_square: Square) -> None:
-        to_square.occupant = from_square.occupant
-        from_square.occupant = None
         # TODO(PT): test this method
         # TODO(PT): this should also update defenders and attackers fields
+        if not from_square.occupant:
+            raise RuntimeError(f'Can\'t move {from_square} to {to_square}. No piece on {from_square}.')
+        to_square.occupant = from_square.occupant
+        from_square.occupant = None
+
+        # is this a pawn promotion?
+        if to_square.occupant.type == PieceType.PAWN:
+            top_rank = 7 if to_square.occupant.color == Color.WHITE else 0
+            if to_square.rank == top_rank:
+                print(f'Promoting pawn at {to_square} to Queen. Flesh me out?')
+                to_square.occupant = Piece(PieceType.QUEEN, to_square.occupant.color)
 
     def move_piece_to_location(self, from_square: Square, location: str) -> None:
         # TODO(PT): test this method
