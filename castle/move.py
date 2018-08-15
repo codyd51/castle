@@ -1,5 +1,4 @@
 from castle.piece import Piece, PieceType, Color
-from castle.board import Board, InvalidChessNotationError
 from castle.square import Square
 
 
@@ -8,15 +7,47 @@ class InvalidMoveError(Exception):
 
 
 class Move:
-    def __init__(self, color: Color, notation: str):
+    def __init__(self, color: Color, notation: str = None):
         self.color = color
         self.notation = notation
         self.from_square: Square = None
         self.to_square: Square = None
         self.is_capture = False
 
+    def __eq__(self, other: 'Move'):
+        # TODO(PT): test me!
+        if self.color != other.color:
+            return False
+        if self.to_square.notation() != other.to_square.notation():
+            return False
+        if self.from_square.notation() != other.from_square.notation():
+            return False
+        # XXX(PT): this does not check the generated notation (since it can vary depending on the source of the Move),
+        # or the is_capture flag.
+        return True
+
+    def __hash__(self):
+        return hash((self.color, self.from_square.notation(), self.to_square.notation()))
+
+    def __repr__(self):
+        return f'({self.from_square.notation()}{self.to_square.notation()})'
+
 
 class MoveParser:
+    @classmethod
+    def move_from_squares(cls, source: Square, dest: Square) -> Move:
+        if not source.occupant:
+            raise RuntimeError(f'can\'t move from a square with no occupant {source}')
+        move = Move(source.occupant.color)
+        move.from_square = source
+        move.to_square = dest
+        if dest.occupant:
+            move.is_capture = True
+            if source.occupant.color == dest.occupant.color:
+                raise RuntimeError(f'can\'t capture another piece of the same color')
+        move.notation = MoveParser.notation_from_move(move)
+        return move
+
     @classmethod
     def notation_from_move(cls, move: Move):
         notation = f''
@@ -30,9 +61,10 @@ class MoveParser:
         return notation
 
     @staticmethod
-    def parse_move(board: Board, active_color: Color, move_str: str) -> Move:
+    def parse_move(board: 'Board', active_color: Color, move_str: str) -> Move:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
         """
+        from castle.board import InvalidChessNotationError
         if not len(move_str):
             raise InvalidChessNotationError('Non-empty chess move required')
 
