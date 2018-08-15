@@ -40,6 +40,27 @@ class Board:
         to_square = self.square_from_notation(move.to_square.notation())
         return MoveParser.move_from_squares(from_square, to_square)
 
+    def get_all_legal_moves(self, color: Color) -> Set[Move]:
+        """Returns a set of all legal Moves from the current board state, respecting rules like check.
+        """
+        all_moves = self._get_all_moves(color)
+        legal_moves = all_moves.copy()
+        # if one player is in check, restrict their legal moves to the ones that would get them out of check
+        if self.is_in_check(color):
+            # go through and apply each move to a new Board, and check if player is still in check
+            for move in all_moves:
+                new_board = self.copy()
+                copied_move = new_board.copy_move(move)
+                # TODO(PT): add a Board.apply_move(move: Move)
+                new_board.move_piece_to_square(copied_move.from_square, copied_move.to_square)
+                if new_board.is_in_check(color):
+                    # throw away this move because it doesn't get us out of check
+                    legal_moves.remove(move)
+        if not len(legal_moves):
+            # there are no moves that would get us out of check
+            raise RuntimeError(f'checkmate')
+        return legal_moves
+
     def _get_all_moves(self, color: Color) -> Set[Move]:
         """Returns a set of all possible Moves from the current board state. Does not respect check!
         """
