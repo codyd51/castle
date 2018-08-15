@@ -61,10 +61,6 @@ class Board:
             if self.board_after_move(move).is_in_check(color):
                 # throw this move away because it results in us being in check
                 legal_moves.remove(move)
-
-        if not len(legal_moves):
-            # there are no moves that would get us out of check
-            raise RuntimeError(f'checkmate')
         return legal_moves
 
     def _get_all_moves(self, color: Color) -> Set[Move]:
@@ -376,7 +372,7 @@ class Board:
                 PieceType.KING:     ('♔', '♚'),
                 PieceType.PAWN:     ('♙', '♟')
             }
-            idx = 0 if piece.color == Color.WHITE else 1
+            idx = 0 if piece.color == Color.BLACK else 1
             symbol = symbols[piece.type][idx]
             print(symbol, end='')
 
@@ -430,6 +426,8 @@ class Board:
                 yield square
 
     def is_in_check(self, color: Color) -> bool:
+        """Can the opposite color capture the King on their next turn?
+        """
         # TODO(PT): test me
         opponent_color = color.opposite()
         opponent_moves = self._get_all_moves(opponent_color)
@@ -441,3 +439,15 @@ class Board:
                 # the opponent can capture our king on the next move, we are in check
                 return True
         return False
+
+    def is_in_checkmate(self, color: Color) -> bool:
+        """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
+        """
+        # TODO(PT): test me
+        return self.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
+
+    def is_in_stalemate(self, color: Color) -> bool:
+        """Does the King have no legal moves?
+        """
+        # TODO(PT): test me
+        return not self.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
