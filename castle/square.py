@@ -10,6 +10,15 @@ class Square:
         self.white_defenders: List[Square] = []
         self.black_defenders: List[Square] = []
 
+    def __eq__(self, other):
+        return self.notation() == other.notation()
+
+    def __hash__(self):
+        return hash((self.rank, self.file, self.occupant))
+
+    def __repr__(self):
+        return self.notation()
+
     @staticmethod
     def file_to_index(file: str) -> int:
         # TODO(PT): replace usage throughout project with this
@@ -24,5 +33,3 @@ class Square:
         # ranks are 1-indexed
         return f'{Square.index_to_file(self.file)}{self.rank + 1}'
 
-    def __repr__(self):
-        return self.notation()
