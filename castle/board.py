@@ -1,6 +1,7 @@
 from typing import List, Set, Optional
 from castle.square import Square
 from castle.piece import PieceType, Piece, Color
+from castle.move import Move, MoveParser
 
 
 class InvalidChessNotationError(Exception):
@@ -20,6 +21,20 @@ class Board:
                 square = Square(rank, file)
                 board[rank].append(square)
         return board
+
+    def _get_all_moves(self, color: Color) -> Set[Move]:
+        """Returns a set of all possible Moves from the current board state. Does not respect check!
+        """
+        moves: Set[Move] = set()
+        movable_squares = self.squares_matching_filter(color=color)
+        for source in movable_squares:
+            moves_from_source = self.get_moves(source)
+            # make a move from each of these
+            # TODO(PT): perhaps get_moves() should return a Move?
+            for dest in moves_from_source:
+                move = MoveParser.move_from_squares(source, dest)
+                moves.add(move)
+        return moves
 
     def get_moves(self, square: Square) -> Set[Square]:
         if square.occupant.type is PieceType.PAWN:
