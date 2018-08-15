@@ -384,4 +384,15 @@ class Board:
             if is_match:
                 yield square
 
-    # TODO(PT): add is_in_check()
+    def is_in_check(self, color: Color) -> bool:
+        # TODO(PT): test me
+        opponent_color = color.opposite()
+        opponent_moves = self._get_all_moves(opponent_color)
+        # look at all the moves for the opposite player's next turn, and see if one of them includes a king capture
+        for move in opponent_moves:
+            if not move.to_square.occupant:
+                continue
+            if move.to_square.occupant.type == PieceType.KING:
+                # the opponent can capture our king on the next move, we are in check
+                return True
+        return False
