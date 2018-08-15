@@ -64,25 +64,29 @@ class BoardTests(unittest.TestCase):
         board.place_piece(black_pawn, 'f3')
         board.place_piece(black_pawn, 'd3')
         self.assertEqual(
-            board.get_moves(board.square_from_notation('b5')),
-            {board.square_from_notation('b4')}
+            {board.square_from_notation('b4')},
+            board.get_moves(board.square_from_notation('b5'))
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('f3')),
-            {board.square_from_notation('e2'), board.square_from_notation('f2')}
+            {board.square_from_notation('e2'), board.square_from_notation('f2')},
+            board.get_moves(board.square_from_notation('f3'))
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('d3')),
-            {board.square_from_notation('e2')}
+            {board.square_from_notation('e2')},
+            board.get_moves(board.square_from_notation('d3'))
         )
         self.assertEqual(
+            set(),
             board.get_moves(board.square_from_notation('d2')),
-            set()
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('e2')),
-            {board.square_from_notation('e3'), board.square_from_notation('e4'),
-             board.square_from_notation('d3'), board.square_from_notation('f3')}
+            {
+                board.square_from_notation('e3'),
+                board.square_from_notation('e4'),
+                board.square_from_notation('d3'),
+                board.square_from_notation('f3')
+            },
+            board.get_moves(board.square_from_notation('e2'))
         )
 
     def test_get_rook_moves(self):
@@ -92,7 +96,6 @@ class BoardTests(unittest.TestCase):
         board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'c3')
         board.place_piece(Piece(PieceType.ROOK, Color.BLACK), 'e6')
         self.assertEqual(
-            board.get_moves(board.square_from_notation('c5')),
             {
                 board.square_from_notation('a5'),
                 board.square_from_notation('b5'),
@@ -102,10 +105,10 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('c7'),
                 board.square_from_notation('c8'),
                 board.square_from_notation('c3')
-            }
+            },
+            board.get_moves(board.square_from_notation('c5'))
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('e6')),
             {
                 board.square_from_notation('a6'),
                 board.square_from_notation('b6'),
@@ -117,7 +120,8 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('e5'),
                 board.square_from_notation('e7'),
                 board.square_from_notation('e8')
-            }
+            },
+            board.get_moves(board.square_from_notation('e6'))
         )
 
     def test_bishop_moves(self):
@@ -127,7 +131,6 @@ class BoardTests(unittest.TestCase):
         board.place_piece(Piece(PieceType.BISHOP, Color.WHITE), 'd3')
         board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'd7')
         self.assertEqual(
-            board.get_moves(board.square_from_notation('c4')),
             {
                 board.square_from_notation('a2'),
                 board.square_from_notation('b3'),
@@ -135,10 +138,10 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('a6'),
                 board.square_from_notation('d5'),
                 board.square_from_notation('e6')
-            }
+            },
+            board.get_moves(board.square_from_notation('c4'))
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('e6')),
             {
                 board.square_from_notation('d5'),
                 board.square_from_notation('c4'),
@@ -147,7 +150,8 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('f5'),
                 board.square_from_notation('g4'),
                 board.square_from_notation('h3')
-            }
+            },
+            board.get_moves(board.square_from_notation('e6'))
         )
 
     def test_knight_moves(self):
@@ -158,7 +162,6 @@ class BoardTests(unittest.TestCase):
         board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'd5')
         board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'f6')
         self.assertEqual(
-            board.get_moves(board.square_from_notation('b6')),
             {
                 board.square_from_notation('a8'),
                 board.square_from_notation('c8'),
@@ -166,10 +169,10 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('d5'),
                 board.square_from_notation('c4'),
                 board.square_from_notation('a4'),
-            }
+            },
+            board.get_moves(board.square_from_notation('b6'))
         )
         self.assertEqual(
-            board.get_moves(board.square_from_notation('e4')),
             {
                 board.square_from_notation('d6'),
                 board.square_from_notation('g5'),
@@ -178,7 +181,8 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('d2'),
                 board.square_from_notation('c3'),
                 board.square_from_notation('c5')
-            }
+            },
+            board.get_moves(board.square_from_notation('e4'))
         )
 
     def test_queen_moves(self):
@@ -192,7 +196,6 @@ class BoardTests(unittest.TestCase):
         board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'f3')
         board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'g5')
         self.assertEqual(
-            board.get_moves(board.square_from_notation('d5')),
             {
                 board.square_from_notation('c5'),
                 board.square_from_notation('b5'),
