@@ -171,6 +171,19 @@ class Game:
         # restore active player
         self.swap_player()
 
+    def perft(self, depth: int) -> int:
+        if depth == 0:
+            return 1
+
+        moves = self.get_all_legal_moves(self.current_player.color)
+        game_states = 0
+
+        for move in moves:
+            self.apply_move(move)
+            game_states += self.perft(depth - 1)
+            self.undo_move()
+        return game_states
+
     def is_in_checkmate(self, color: Color) -> bool:
         """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
         """
