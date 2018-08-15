@@ -306,6 +306,8 @@ class Board:
         # TODO(PT): this should also update defenders and attackers fields
         if not from_square.occupant:
             raise RuntimeError(f'Can\'t move {from_square} to {to_square}. No piece on {from_square}.')
+        if to_square.occupant and to_square.occupant.color == from_square.occupant.color:
+            raise InvalidChessNotationError(f'Can\'t move onto your own piece')
         to_square.occupant = from_square.occupant
         from_square.occupant = None
 
