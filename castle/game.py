@@ -153,6 +153,24 @@ class Game:
             return Color.WHITE
         return None
 
+    def undo_move(self):
+        if not len(self.moves):
+            raise InvalidMoveError('Can\'t undo from starting position')
+
+        # TODO(PT): test me please!
+        last_move = self.moves.pop()
+        if type(last_move) == CastleMove:
+            raise RuntimeError(f'undo castle')
+
+        self.board.move_piece_to_square(last_move.to_square, last_move.from_square)
+
+        # restore the previous occupant of the square, if any
+        if last_move.is_capture:
+            self.board.place_piece(last_move.captured_piece, last_move.to_square.notation())
+
+        # restore active player
+        self.swap_player()
+
     def is_in_checkmate(self, color: Color) -> bool:
         """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
         """
