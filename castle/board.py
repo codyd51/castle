@@ -12,6 +12,12 @@ class Board:
     def __init__(self):
         self._squares: List[List[Square]] = Board.construct_squares()
 
+    def clear(self):
+        """Remove all occupants from the board. Typically used for testing purposes.
+        """
+        for square in self.squares_occupied():
+            square.occupant = None
+
     @classmethod
     def construct_squares(cls) -> List[List[Square]]:
         board: List[List[Square]] = []
@@ -21,6 +27,18 @@ class Board:
                 square = Square(rank, file)
                 board[rank].append(square)
         return board
+
+    def copy(self) -> 'Board':
+        clone = Board()
+        for square, copy_square in list(zip(self.squares_all(), clone.squares_all())):
+            if square.occupant:
+                copy_square.occupant = Piece(square.occupant.type, square.occupant.color)
+        return clone
+
+    def copy_move(self, move: Move) -> Move:
+        from_square = self.square_from_notation(move.from_square.notation())
+        to_square = self.square_from_notation(move.to_square.notation())
+        return MoveParser.move_from_squares(from_square, to_square)
 
     def _get_all_moves(self, color: Color) -> Set[Move]:
         """Returns a set of all possible Moves from the current board state. Does not respect check!
