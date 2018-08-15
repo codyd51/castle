@@ -48,8 +48,7 @@ class Board:
         elif square.occupant.type is PieceType.QUEEN:
             return self._get_queen_moves(square)
         elif square.occupant.type is PieceType.KING:
-            return set()
-            pass
+            return self._get_king_moves(square)
 
     def _get_pawn_moves(self, square: Square) -> Set[Square]:
         """
@@ -253,6 +252,21 @@ class Board:
         :return: all possible _squares the queen could move to in the current board state
         """
         return self._get_bishop_moves(square) | self._get_rook_moves(square)
+
+    def _get_king_moves(self, square: Square) -> Set[Square]:
+        # TODO(PT): should all movement methods assert the occupant?
+        valid_adjacent_squares = set()
+        # get all the squares surrounding this one
+        for x in range(square.rank - 1, square.rank + 2):
+            for y in range(square.file - 1, square.file + 2):
+                try:
+                    # if this square is off the board, this call will raise an exception
+                    s = self.square_from_coord(x, y)
+                    if not s.occupant or s.occupant.color != square.occupant.color:
+                        valid_adjacent_squares.add(s)
+                except InvalidChessNotationError:
+                    continue
+        return valid_adjacent_squares
 
     def place_piece(self, piece: Piece, location: str) -> None:
         square = self.square_from_notation(location)
