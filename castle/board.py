@@ -404,26 +404,24 @@ class Board:
                                 file_str: Optional[str] = None,
                                 can_reach_square: Optional[Square] = None):
         for square in self.squares_occupied():
-            is_match = True
             if type and square.occupant.type != type:
-                is_match = False
+                continue
             if color and square.occupant.color != color:
-                is_match = False
+                continue
             if rank and square.rank != rank:
-                is_match = False
+                continue
             if file and square.file != file:
-                is_match = False
+                continue
             if rank_str and rank_str != str(square.rank):
-                is_match = False
+                continue
             if file_str and file_str != Square.index_to_file(square.file):
-                is_match = False
+                continue
             if can_reach_square:
                 moves = self.get_moves(square)
                 if can_reach_square not in moves:
-                    is_match = False
+                    continue
 
-            if is_match:
-                yield square
+            yield square
 
     def is_in_check(self, color: Color) -> bool:
         """Can the opposite color capture the King on their next turn?

@@ -13,6 +13,8 @@ class Move:
         self.from_square: Square = None
         self.to_square: Square = None
         self.is_capture = False
+        self.active_piece: Piece = None
+        self.captured_piece: Piece = None
 
     def __eq__(self, other: 'Move'):
         # TODO(PT): test me!
@@ -41,8 +43,10 @@ class MoveParser:
         move = Move(source.occupant.color)
         move.from_square = source
         move.to_square = dest
+        move.active_piece = source.occupant
         if dest.occupant:
             move.is_capture = True
+            move.captured_piece = dest.occupant
             if source.occupant.color == dest.occupant.color:
                 raise RuntimeError(f'can\'t capture another piece of the same color')
         move.notation = MoveParser.notation_from_move(move)
@@ -82,6 +86,7 @@ class MoveParser:
             from_square = move_str[:move_str.find('x')]
             to_square_str = move_str[move_str.find('x')+1:]
             move.to_square = board.square_from_notation(to_square_str)
+            move.captured_piece = move.to_square.occupant
 
             from_type = PieceType.type_from_symbol(from_square[0])
             from_file = None
@@ -94,8 +99,9 @@ class MoveParser:
                                                               can_reach_square=move.to_square))
             # there should be exactly one source square
             if len(from_squares) != 1:
-                raise InvalidMoveError(move_str)
+                raise InvalidMoveError(f'{move_str} is ambiguous')
             move.from_square = from_squares[0]
+            move.active_piece = move.from_square.occupant
             return move
 
         # piece type will be the first character
@@ -120,6 +126,7 @@ class MoveParser:
             raise InvalidChessNotationError(f'Ambiguous move: {move_str}')
         elif len(pieces_fulfilling_source_square_requirements) == 1:
             move.from_square = pieces_fulfilling_source_square_requirements[0]
+            move.active_piece = move.from_square.occupant
             return move
 
         raise InvalidMoveError(move_str)

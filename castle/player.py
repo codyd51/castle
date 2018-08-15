@@ -53,10 +53,12 @@ class RandomPlayer(Player):
         dest = random.sample(moves, 1)[0]
 
         move = Move(self.color, '')
+        move.active_piece = source.occupant
         move.from_square = source
         move.to_square = dest
         if dest.occupant:
             move.is_capture = True
+            move.captured_piece = dest.occupant
         notation = MoveParser.notation_from_move(move)
         move.notation = notation
 
