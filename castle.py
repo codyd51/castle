@@ -36,8 +36,16 @@ def main():
     player1, player2 = select_player_types()
     g = castle.Game(player1, player2)
     g.board.pretty_print()
-    while True:
+    while not g.finished:
         g.play_turn()
+
+    winning_prefix = f'Game over by '
+    if g.winner == castle.Winner.DRAW:
+        winning_prefix += 'stalemate'
+    else:
+        winning_prefix += 'checkmate'
+    winning_text = f'{winning_prefix}. Winner: {g.winner.name.title()}'
+    print(winning_text)
 
 
 if __name__ == '__main__':

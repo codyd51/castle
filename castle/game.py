@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+from enum import Enum
 
 from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
@@ -7,8 +8,18 @@ from castle.move import Move, MoveParser, InvalidMoveError
 from castle.player import PlayerType
 
 
-class IllegalMoveError(Exception):
-    pass
+class Winner(Enum):
+    DRAW = 0
+    WHITE = 1
+    BLACK = 2
+
+    @classmethod
+    def from_color(cls, color: Color):
+        if color == Color.WHITE:
+            return Winner.WHITE
+        elif color == Color.BLACK:
+            return Winner.BLACK
+        raise RuntimeError(f'No conversion from {color} to Winner')
 
 
 class Game:
@@ -16,6 +27,9 @@ class Game:
         self.board = Board()
         self.moves: List[Move] = []
         self.place_pieces_for_new_game()
+
+        self.finished = False
+        self.winner: Optional[Winner] = None
 
         if player1 == PlayerType.HUMAN:
             self.white_player = HumanPlayer(Color.WHITE)
@@ -65,13 +79,12 @@ class Game:
         self.board.place_piece(Piece(PieceType.PAWN, Color.BLACK), 'h7')
 
     def play_turn(self) -> None:
-        for i in range(3):
+        for i in range(5):
             try:
                 move = self.current_player.play_move(self.board)
                 legal_moves = self.board.get_all_legal_moves(self.current_player.color)
                 if move not in legal_moves:
-                    print(f'Currently legal moves: {legal_moves}')
-                    raise IllegalMoveError(f'Valid but currently illegal move {move}.')
+                    raise InvalidMoveError
 
                 self.apply_move(move)
                 self.pretty_print()
@@ -91,7 +104,16 @@ class Game:
     def apply_move(self, move: Move) -> None:
         self.board.move_piece_to_square(move.from_square, move.to_square)
         self.moves.append(move)
+        previous_player = self.current_player
         self.current_player = self.white_player if self.current_player == self.black_player else self.black_player
+
+        # endgame detection
+        if self.board.is_in_checkmate(self.current_player.color):
+            self.finished = True
+            self.winner = Winner.from_color(previous_player.color)
+        elif self.board.is_in_stalemate(self.current_player.color):
+            self.finished = True
+            self.winner = Winner.DRAW
 
     def pretty_print(self) -> None:
         self.board.pretty_print()
@@ -106,3 +128,10 @@ class Game:
                 pass
             turn += 1
         print()
+
+    def winner(self) -> Optional[Color]:
+        if self.board.is_in_checkmate(Color.WHITE):
+            return Color.BLACK
+        elif self.board.is_in_checkmate(Color.BLACK):
+            return Color.WHITE
+        return None
