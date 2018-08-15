@@ -165,3 +165,26 @@ class Game:
         # TODO(PT): test me
         return not self.board.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
 
+    def moves_matching_filter(self,
+                              color: Color = None,
+                              from_square: Square = None,
+                              to_square: Square = None,
+                              from_type: PieceType = None,
+                              is_castle: bool = False):
+        for move in self.moves:
+            if color and move.color != color:
+                continue
+
+            if is_castle is not None:
+                desired_class = CastleMove if is_castle else Move
+                if type(move) != desired_class:
+                    continue
+
+            if type(move) != CastleMove:
+                if from_square and from_square != move.from_square:
+                    continue
+                if to_square and to_square != move.to_square:
+                    continue
+                if from_type and from_type != move.active_piece.type:
+                    continue
+            yield move
