@@ -7,6 +7,10 @@ from castle.move import Move, MoveParser, InvalidMoveError
 from castle.player import PlayerType
 
 
+class IllegalMoveError(Exception):
+    pass
+
+
 class Game:
     def __init__(self, player1: PlayerType, player2: PlayerType) -> None:
         self.board = Board()
@@ -64,12 +68,12 @@ class Game:
         for i in range(3):
             try:
                 move = self.current_player.play_move(self.board)
-                if type(move) == str:
-                    self.apply_notation(move)
-                elif type(move) == Move:
-                    self.apply_move(move)
-                else:
-                    raise RuntimeError(f'unknown move type {type(move)}')
+                legal_moves = self.board.get_all_legal_moves(self.current_player.color)
+                if move not in legal_moves:
+                    print(f'Currently legal moves: {legal_moves}')
+                    raise IllegalMoveError(f'Valid but currently illegal move {move}.')
+
+                self.apply_move(move)
                 self.pretty_print()
                 return
             except InvalidMoveError as e:
