@@ -72,8 +72,13 @@ class MoveParser:
         if not len(move_str):
             raise InvalidChessNotationError('Non-empty chess move required')
 
-        move = Move(active_color, move_str)
+        # castle?
+        if move_str == CastleMove.KINGSIDE_NOTATION:
+            return CastleMove(active_color, True)
+        elif move_str == CastleMove.QUEENSIDE_NOTATION:
+            return CastleMove(active_color, False)
 
+        move = Move(active_color, move_str)
         # if a pawn is being moved, prepend a P to the notation string so pawn movements are internally
         # consistent with other piece's movement. This is so all pieces can be handled with the same logic.
         if move_str[0].islower():
@@ -130,3 +135,54 @@ class MoveParser:
             return move
 
         raise InvalidMoveError(move_str)
+
+
+class CastleMove(Move):
+    KINGSIDE_NOTATION = 'O-O'
+    QUEENSIDE_NOTATION = 'O-O-O'
+
+    def __init__(self, color: Color, kingside: bool):
+        notation = CastleMove.KINGSIDE_NOTATION if kingside else CastleMove.QUEENSIDE_NOTATION
+        super(CastleMove, self).__init__(color, notation)
+        self.color = color
+        self.kingside = kingside
+
+    def __eq__(self, other):
+        if type(other) != CastleMove:
+            return False
+        if self.color != other.color:
+            return False
+        if self.kingside != other.kingside:
+            return False
+        return True
+
+    def __hash__(self):
+        return hash((self.color, self.kingside))
+
+    def __repr__(self):
+        color = self.color.name.title()
+        side = 'short' if self.kingside else 'long'
+        return f'({color} {side} castle)'
+
+    def apply(self, board: 'Board'):
+        king_file = Square.file_to_index('e')
+        if self.color == Color.WHITE:
+            rank = 0
+        else:
+            rank = 7
+        if self.kingside:
+            rook_file = Square.file_to_index('h')
+            rook_dest_file = Square.file_to_index('f')
+            king_dest_file = Square.file_to_index('g')
+        else:
+            rook_file = Square.file_to_index('a')
+            rook_dest_file = Square.file_to_index('d')
+            king_dest_file = Square.file_to_index('c')
+
+        king = board.square_from_coord(rank, king_file)
+        rook = board.square_from_coord(rank, rook_file)
+        king_dest = board.square_from_coord(rank, king_dest_file)
+        rook_dest = board.square_from_coord(rank, rook_dest_file)
+
+        board.move_piece_to_square(rook, rook_dest)
+        board.move_piece_to_square(king, king_dest)

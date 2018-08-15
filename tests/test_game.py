@@ -85,4 +85,18 @@ class GameTests(unittest.TestCase):
         self.assertEqual(len(legal_moves), 1)
         self.assertEqual(MoveParser.parse_move(g.board, Color.WHITE, 'Kxg2'), legal_moves.pop())
 
+    def test_white_kingside_castle(self):
+        g = castle.Game(PlayerType.HUMAN, PlayerType.HUMAN)
+        g.apply_notation('e4')
+        g.apply_notation('e5')
+        g.apply_notation('Nf3')
+        g.apply_notation('a5')
+        g.apply_notation('Be2')
+        g.apply_notation('b5')
+        # white is now ready to kingside castle
+        g.apply_notation('O-O')
 
+    def test_black_queenside_castle(self):
+        g = castle.Game(PlayerType.HUMAN, PlayerType.HUMAN)
+
+    # TODO(PT): check all the castling rules

@@ -1,7 +1,7 @@
 from typing import List, Set, Optional
 from castle.square import Square
 from castle.piece import PieceType, Piece, Color
-from castle.move import Move, MoveParser
+from castle.move import Move, CastleMove, MoveParser
 
 
 class InvalidChessNotationError(Exception):
@@ -36,12 +36,20 @@ class Board:
         return clone
 
     def copy_move(self, move: Move) -> Move:
+        if type(move) == CastleMove:
+            move: CastleMove = move
+            return CastleMove(move.color, move.kingside)
+
         from_square = self.square_from_notation(move.from_square.notation())
         to_square = self.square_from_notation(move.to_square.notation())
         return MoveParser.move_from_squares(from_square, to_square)
 
     def apply_move(self, move: Move):
-        self.move_piece_to_square(move.from_square, move.to_square)
+        if type(move) == CastleMove:
+            move: CastleMove = move
+            move.apply(self)
+        else:
+            self.move_piece_to_square(move.from_square, move.to_square)
 
     def board_after_move(self, move: Move) -> 'Board':
         """Clone the current board state and apply the provided Move to it, then return the board state.

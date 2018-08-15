@@ -1,11 +1,13 @@
-from typing import List, Optional
+import logging
 from enum import Enum
+from typing import List, Optional, Set
 
 from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
 from castle.player import HumanPlayer, RandomPlayer
-from castle.move import Move, MoveParser, InvalidMoveError
+from castle.move import Move, CastleMove, MoveParser, InvalidMoveError
 from castle.player import PlayerType
+from castle.square import Square
 
 
 class Winner(Enum):
@@ -108,6 +110,64 @@ class Game:
             if self.board.board_after_move(move).is_in_check(color):
                 # throw this move away because it results in us being in check
                 legal_moves.remove(move)
+
+        # add in castle moves if possible
+        for on_kingside in [True, False]:
+            if self.can_castle(color, on_kingside):
+                side = 'kingside' if on_kingside else 'queenside'
+                logging.debug(f'{color} can {side} castle')
+                legal_moves.add(CastleMove(color, on_kingside))
+
+        return legal_moves
+
+    def can_castle(self, color: Color, kingside: bool):
+        # have they already castled?
+        if len(list(self.moves_matching_filter(color=color, is_castle=True))):
+            return False
+        # have they moved their king?
+        if len(list(self.moves_matching_filter(color=color, from_type=PieceType.KING))):
+            return False
+        # have they moved their rook?
+        rook_file = 0 if kingside else 7
+        rook_rank = 7 if kingside else 0
+        rook_square = self.board.square_from_coord(rook_rank, rook_file)
+        if len(list(self.moves_matching_filter(color=color, from_square=rook_square))):
+            return False
+
+        # are they in check?
+        if self.board.is_in_check(color):
+            return False
+
+        if color == Color.WHITE:
+            if kingside:
+                traveled_square_notations = ['f1', 'g1']
+            else:
+                traveled_square_notations = ['d1', 'c1', 'b1']
+            king_square = self.board.square_from_notation('e1')
+        else:
+            if kingside:
+                traveled_square_notations = ['f8', 'g8']
+            else:
+                traveled_square_notations = ['d8', 'c8', 'b8']
+            king_square = self.board.square_from_notation('e8')
+        traveled_squares = [self.board.square_from_notation(x) for x in traveled_square_notations]
+
+        # are any of the squares in the way obstructed?
+        for s in traveled_squares:
+            if s.occupant:
+                return False
+
+        # would moving on any of the squares on the way put the king in check?
+        for s in traveled_squares:
+            move = MoveParser.move_from_squares(king_square, s)
+            if self.board.board_after_move(move).is_in_check(color):
+                return False
+
+        # would castling put the player in check?
+        if self.board.board_after_move(CastleMove(color, kingside)).is_in_check(color):
+            return False
+
+        return True
 
     def apply_notation(self, move_str: str) -> None:
         move = MoveParser.parse_move(self.board, self.current_player.color, move_str)
