@@ -78,14 +78,19 @@ class MoveParser:
         # is it a capture? SxDD
         if 'x' in move_str:
             move.is_capture = True
-            # TODO(PT): add support for Nexd6
+            # TODO(PT): test for Nexd6
             from_square = move_str[:move_str.find('x')]
             to_square_str = move_str[move_str.find('x')+1:]
             move.to_square = board.square_from_notation(to_square_str)
 
             from_type = PieceType.type_from_symbol(from_square[0])
+            from_file = None
+            # if a file is specified, make use of it
+            if len(from_square) > 1:
+                from_file = from_square[1]
             from_squares = list(board.squares_matching_filter(type=from_type,
                                                               color=active_color,
+                                                              file_str=from_file,
                                                               can_reach_square=move.to_square))
             # there should be exactly one source square
             if len(from_squares) != 1:
