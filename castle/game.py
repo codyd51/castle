@@ -82,9 +82,9 @@ class Game:
         for i in range(5):
             try:
                 move = self.current_player.play_move(self.board)
-                legal_moves = self.board.get_all_legal_moves(self.current_player.color)
+                legal_moves = self.get_all_legal_moves(self.current_player.color)
                 if move not in legal_moves:
-                    raise InvalidMoveError
+                    raise InvalidMoveError('Illegal')
 
                 self.apply_move(move)
                 self.pretty_print()
@@ -97,21 +97,38 @@ class Game:
                 print(f'Invalid notation. {stripped_notation}.')
         raise RuntimeError(f'{self.current_player.color.name} provided invalid move 3 times.')
 
+    def get_all_legal_moves(self, color: Color) -> Set[Move]:
+        """Returns a set of all legal Moves from the current board state, respecting rules like check.
+        This method does 'move post processing' to transform a pseudo-legal
+        """
+        all_moves = self.board.get_all_moves(color)
+        legal_moves = all_moves.copy()
+        # restrict moves to ones that do not result in the player being in check after this turn
+        for move in all_moves:
+            if self.board.board_after_move(move).is_in_check(color):
+                # throw this move away because it results in us being in check
+                legal_moves.remove(move)
+
     def apply_notation(self, move_str: str) -> None:
         move = MoveParser.parse_move(self.board, self.current_player.color, move_str)
         self.apply_move(move)
 
-    def apply_move(self, move: Move) -> None:
-        self.board.move_piece_to_square(move.from_square, move.to_square)
-        self.moves.append(move)
-        previous_player = self.current_player
+    def swap_player(self):
         self.current_player = self.white_player if self.current_player == self.black_player else self.black_player
 
+    def apply_move(self, move: Move) -> None:
+        self.board.apply_move(move)
+
+        # update game state
+        self.moves.append(move)
+        previous_player = self.current_player
+        self.swap_player()
+
         # endgame detection
-        if self.board.is_in_checkmate(self.current_player.color):
+        if self.is_in_checkmate(self.current_player.color):
             self.finished = True
             self.winner = Winner.from_color(previous_player.color)
-        elif self.board.is_in_stalemate(self.current_player.color):
+        elif self.is_in_stalemate(self.current_player.color):
             self.finished = True
             self.winner = Winner.DRAW
 
@@ -130,8 +147,21 @@ class Game:
         print()
 
     def winner(self) -> Optional[Color]:
-        if self.board.is_in_checkmate(Color.WHITE):
+        if self.is_in_checkmate(Color.WHITE):
             return Color.BLACK
-        elif self.board.is_in_checkmate(Color.BLACK):
+        elif self.is_in_checkmate(Color.BLACK):
             return Color.WHITE
         return None
+
+    def is_in_checkmate(self, color: Color) -> bool:
+        """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
+        """
+        # TODO(PT): test me
+        return self.board.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
+
+    def is_in_stalemate(self, color: Color) -> bool:
+        """Does the King have no legal moves?
+        """
+        # TODO(PT): test me
+        return not self.board.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
+

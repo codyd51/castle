@@ -51,19 +51,7 @@ class Board:
         new_board.apply_move(copied_move)
         return new_board
 
-    def get_all_legal_moves(self, color: Color) -> Set[Move]:
-        """Returns a set of all legal Moves from the current board state, respecting rules like check.
-        """
-        all_moves = self._get_all_moves(color)
-        legal_moves = all_moves.copy()
-        # restrict moves to ones that do not result in the player being in check after this turn
-        for move in all_moves:
-            if self.board_after_move(move).is_in_check(color):
-                # throw this move away because it results in us being in check
-                legal_moves.remove(move)
-        return legal_moves
-
-    def _get_all_moves(self, color: Color) -> Set[Move]:
+    def get_all_moves(self, color: Color) -> Set[Move]:
         """Returns a set of all possible Moves from the current board state. Does not respect check!
         """
         moves: Set[Move] = set()
@@ -428,7 +416,7 @@ class Board:
         """
         # TODO(PT): test me
         opponent_color = color.opposite()
-        opponent_moves = self._get_all_moves(opponent_color)
+        opponent_moves = self.get_all_moves(opponent_color)
         # look at all the moves for the opposite player's next turn, and see if one of them includes a king capture
         for move in opponent_moves:
             if not move.to_square.occupant:
@@ -437,15 +425,3 @@ class Board:
                 # the opponent can capture our king on the next move, we are in check
                 return True
         return False
-
-    def is_in_checkmate(self, color: Color) -> bool:
-        """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
-        """
-        # TODO(PT): test me
-        return self.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
-
-    def is_in_stalemate(self, color: Color) -> bool:
-        """Does the King have no legal moves?
-        """
-        # TODO(PT): test me
-        return not self.is_in_check(color) and len(self.get_all_legal_moves(color)) == 0
