@@ -209,8 +209,53 @@ class BoardTests(unittest.TestCase):
                 board.square_from_notation('d6'),
                 board.square_from_notation('d7'),
                 board.square_from_notation('d8'),
+            },
+            board.get_moves(board.square_from_notation('d5'))
+        )
 
-            }
+    def test_king_moves(self):
+        from castle import MoveParser
+        # obstructed king with threat of check
+        board = Board()
+        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
+        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
+        board.place_piece(Piece(PieceType.ROOK, Color.BLACK), 'h3')
+        self.assertEqual(
+            {
+                MoveParser.parse_move(board, Color.WHITE, 'Kg2'),
+                MoveParser.parse_move(board, Color.WHITE, 'Kg1'),
+            },
+            board.get_all_legal_moves(Color.WHITE)
+        )
+
+        # obstructed king without threat of check
+        board = Board()
+        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
+        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
+        self.assertEqual(
+            {
+                MoveParser.parse_move(board, Color.WHITE, 'Kg2'),
+                MoveParser.parse_move(board, Color.WHITE, 'Kg1'),
+                MoveParser.parse_move(board, Color.WHITE, 'Kh2'),
+            },
+            board.get_all_legal_moves(Color.WHITE)
+        )
+
+        # unobstructed king
+        board = Board()
+        board.place_piece(Piece(PieceType.KING, Color.BLACK), 'e4')
+        self.assertEqual(
+            {
+                board.square_from_notation('d5'),
+                board.square_from_notation('e5'),
+                board.square_from_notation('d4'),
+                board.square_from_notation('f5'),
+                board.square_from_notation('d3'),
+                board.square_from_notation('f4'),
+                board.square_from_notation('e3'),
+                board.square_from_notation('f3'),
+            },
+            board.get_moves(board.square_from_notation('e4'))
         )
 
     def test_pawn_pushed_forward(self):
