@@ -219,10 +219,7 @@ class Game:
 
         # TODO(PT): test me please!
         last_move = self.moves.pop()
-        if type(last_move) == CastleMove:
-            raise RuntimeError(f'undo castle')
-
-        self.board.move_piece_to_square(last_move.to_square, last_move.from_square)
+        last_move.undo(self.board)
 
         # restore the previous occupant of the square, if any
         if last_move.is_capture:

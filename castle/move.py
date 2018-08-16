@@ -34,6 +34,9 @@ class Move:
     def __repr__(self):
         return f'({self.from_square.notation()}{self.to_square.notation()})'
 
+    def undo(self, board: 'Board'):
+        board.move_piece_to_square(self.to_square, self.from_square)
+
 
 class MoveParser:
     @classmethod
@@ -186,3 +189,18 @@ class CastleMove(Move):
 
         board.move_piece_to_square(rook, rook_dest)
         board.move_piece_to_square(king, king_dest)
+
+    def undo(self, board: 'Board'):
+        rank = 0 if self.color == Color.WHITE else 7
+        king_orig_file = 4
+        king_curr_file = 6 if self.kingside else 2
+        king_orig_square = board.square_from_coord(rank, king_orig_file)
+        king_curr_square = board.square_from_coord(rank, king_curr_file)
+
+        rook_orig_file = 7 if self.kingside else 0
+        rook_curr_file = 5 if self.kingside else 3
+        rook_orig_square = board.square_from_coord(rank, rook_orig_file)
+        rook_curr_square = board.square_from_coord(rank, rook_curr_file)
+
+        board.move_piece_to_square(king_curr_square, king_orig_square)
+        board.move_piece_to_square(rook_curr_square, rook_orig_square)
