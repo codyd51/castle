@@ -187,6 +187,12 @@ class Game:
     def swap_player(self):
         self.current_player = self.white_player if self.current_player == self.black_player else self.black_player
 
+    def set_color_to_move(self, color: Color):
+        if color == Color.WHITE:
+            self.current_player = self.white_player
+        else:
+            self.current_player = self.black_player
+
     def apply_move(self, move: Move) -> None:
         self.board.apply_move(move)
 
