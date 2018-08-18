@@ -33,6 +33,11 @@ class Game:
         self.finished = False
         self.winner: Optional[Winner] = None
 
+        self.can_white_castle_short = True
+        self.can_white_castle_long = True
+        self.can_black_castle_short = True
+        self.can_black_castle_long = True
+
         if player1 == PlayerType.HUMAN:
             self.white_player = HumanPlayer(Color.WHITE)
         else:
@@ -120,18 +125,24 @@ class Game:
 
         return legal_moves
 
+    def _castle_flag_for_location(self, color: Color, kingside: bool):
+        can_castle_flag_map = {
+            (Color.WHITE, True): 'can_white_castle_short',
+            (Color.WHITE, False): 'can_white_castle_long',
+            (Color.BLACK, True): 'can_black_castle_short',
+            (Color.BLACK, False): 'can_black_castle_long',
+        }
+        can_castle_flag_name = can_castle_flag_map[(color, kingside)]
+        return can_castle_flag_name
+
+    def disallow_castle_for_location(self, color: Color, kingside: bool):
+        flag_name = self._castle_flag_for_location(color, kingside)
+        self.__setattr__(flag_name, False)
+
     def can_castle(self, color: Color, kingside: bool):
-        # have they already castled?
-        if len(list(self.moves_matching_filter(color=color, is_castle=True))):
-            return False
-        # have they moved their king?
-        if len(list(self.moves_matching_filter(color=color, from_type=PieceType.KING))):
-            return False
-        # have they moved their rook?
-        rook_file = 0 if kingside else 7
-        rook_rank = 7 if kingside else 0
-        rook_square = self.board.square_from_coord(rook_rank, rook_file)
-        if len(list(self.moves_matching_filter(color=color, from_square=rook_square))):
+        can_castle_flag_name = self._castle_flag_for_location(color, kingside)
+        can_castle_flag = self.__getattribute__(can_castle_flag_name)
+        if not can_castle_flag:
             return False
 
         # are they in check?
@@ -183,6 +194,22 @@ class Game:
         self.moves.append(move)
         previous_player = self.current_player
         self.swap_player()
+
+        if type(move) == CastleMove:
+            # this castle will not be allowed again
+            move: CastleMove = move
+            self.disallow_castle_for_location(move.color, move.kingside)
+        else:
+            # also can't castle if a player moves their king
+            if move.active_piece.type == PieceType.KING:
+                self.disallow_castle_for_location(move.color, True)
+                self.disallow_castle_for_location(move.color, False)
+            # lastly, can't castle on a given side if you move that rook
+            if move.active_piece.type == PieceType.ROOK:
+                if move.from_square in [self.board.square_from_notation('a1'), self.board.square_from_notation('a8')]:
+                    self.disallow_castle_for_location(move.color, False)
+                elif move.from_square in [self.board.square_from_notation('h1'), self.board.square_from_notation('h8')]:
+                    self.disallow_castle_for_location(move.color, True)
 
         # endgame detection
         if self.is_in_checkmate(self.current_player.color):
