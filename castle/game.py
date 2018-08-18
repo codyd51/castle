@@ -153,13 +153,13 @@ class Game:
             if kingside:
                 traveled_square_notations = ['f1', 'g1']
             else:
-                traveled_square_notations = ['d1', 'c1', 'b1']
+                traveled_square_notations = ['d1', 'c1']
             king_square = self.board.square_from_notation('e1')
         else:
             if kingside:
                 traveled_square_notations = ['f8', 'g8']
             else:
-                traveled_square_notations = ['d8', 'c8', 'b8']
+                traveled_square_notations = ['d8', 'c8']
             king_square = self.board.square_from_notation('e8')
         traveled_squares = [self.board.square_from_notation(x) for x in traveled_square_notations]
 
