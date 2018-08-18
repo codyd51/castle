@@ -274,6 +274,11 @@ class Game:
             self.undo_move()
         return game_states
 
+    def print_perft(self, depth: int) -> None:
+        for i in range(0, depth):
+            perft = self.perft(i)
+            print(f'perft({i}) = {perft}')
+
     def is_in_checkmate(self, color: Color) -> bool:
         """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
         """
