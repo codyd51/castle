@@ -243,6 +243,10 @@ class Game:
             king_square = self.board.square_from_notation('e8')
         traveled_squares = [self.board.square_from_notation(x) for x in traveled_square_notations]
 
+        # is the king on the wrong square?
+        if not king_square.occupant or king_square.occupant != Piece(PieceType.KING, color):
+            return False
+
         # are any of the squares in the way obstructed?
         for s in traveled_squares:
             if s.occupant:
@@ -261,7 +265,7 @@ class Game:
         return True
 
     def apply_notation(self, move_str: str) -> None:
-        move = MoveParser.parse_move(self.board, self.current_player.color, move_str)
+        move = MoveParser.parse_move(self, move_str)
         self.apply_move(move)
 
     def swap_player(self):

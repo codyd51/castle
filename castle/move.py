@@ -69,10 +69,17 @@ class MoveParser:
         return notation
 
     @staticmethod
-    def parse_move(board: 'Board', active_color: Color, move_str: str) -> Move:
+    #def parse_move(board: 'Board', active_color: Color, move_str: str) -> Move:
+    def parse_move(game: 'Game', move_str: str) -> Move:
         """Parses chess notation in the context of the board, and returns the piece which is moving and its destination.
         """
         from castle.board import InvalidChessNotationError
+        from castle.game import Game
+
+        game: Game = game
+        active_color = game.current_player.color
+        board = game.board
+
         if not len(move_str):
             raise InvalidChessNotationError('Non-empty chess move required')
 
