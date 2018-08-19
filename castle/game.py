@@ -5,7 +5,7 @@ from typing import List, Optional, Set
 from castle.board import Board, InvalidChessNotationError
 from castle.piece import Piece, PieceType, Color
 from castle.player import HumanPlayer, RandomPlayer
-from castle.move import Move, CastleMove, MoveParser, InvalidMoveError
+from castle.move import Move, CastleMove, EnPassantMove, MoveParser, InvalidMoveError
 from castle.player import PlayerType
 from castle.square import Square
 
@@ -37,6 +37,7 @@ class Game:
         self.can_white_castle_long = True
         self.can_black_castle_short = True
         self.can_black_castle_long = True
+        self.en_passant_target_square: Square = None
 
         if player1 == PlayerType.HUMAN:
             self.white_player = HumanPlayer(Color.WHITE)
@@ -89,6 +90,9 @@ class Game:
         for i in range(5):
             try:
                 move = self.current_player.play_move(self.board)
+                if type(move) == str:
+                    move = MoveParser.parse_move(self, move)
+
                 legal_moves = self.get_all_legal_moves(self.current_player.color)
                 if move not in legal_moves:
                     raise InvalidMoveError('Illegal')
@@ -110,6 +114,18 @@ class Game:
         """
         all_moves = self.board.get_all_moves(color)
         legal_moves = all_moves.copy()
+
+        # add in en passant if possible
+        # this must be done before restricting moves to ones that do not check for putting ourselves in check
+        if self.en_passant_target_square or self.en_passant_eligible():
+            logging.debug(f'en passant target square: {self.en_passant_target_square}')
+            # add all pawns which are attacking the target square
+            unsafe_square = self.en_passant_unsafe_square()
+
+            attackers = self.en_passant_attackers()
+            for attacker in attackers:
+                legal_moves.add(EnPassantMove(self.en_passant_target_square, attacker, unsafe_square))
+
         # restrict moves to ones that do not result in the player being in check after this turn
         for move in all_moves:
             if self.board.board_after_move(move).is_in_check(color):
@@ -124,6 +140,70 @@ class Game:
                 legal_moves.add(CastleMove(color, on_kingside))
 
         return legal_moves
+
+    # TODO(PT): spin off en passant logic into its own class?
+    def en_passant_unsafe_square(self) -> Optional[Square]:
+        if not self.en_passant_target_square:
+            return None
+
+        last_move = self.moves[-1]
+        return last_move.to_square
+
+    def en_passant_attackers(self, target_square: Square = None) -> Optional[List[Square]]:
+        if not len(self.moves):
+            return None
+
+        last_move = self.moves[-1]
+        if not target_square:
+            target_square = self.en_passant_target_square
+
+        if not target_square:
+            return None
+
+        # is there an opponent pawn attacking the target square?
+        attacker_files = [target_square.file - 1, target_square.file + 1]
+        attackers = []
+        for attacker_file in attacker_files:
+            attacker = list(self.board.squares_matching_filter(
+                color=last_move.active_piece.color.opposite(),
+                type=PieceType.PAWN,
+                file=attacker_file,
+                rank=last_move.to_square.rank
+            ))
+            attackers += attacker
+        return attackers
+
+    def en_passant_eligible(self) -> bool:
+        if not len(self.moves):
+            return False
+
+        last_move = self.moves[-1]
+
+        # en passant isn't possible for castle moves, etc
+        if type(last_move) != Move:
+            return False
+
+        # check if en passant applies
+        if last_move.active_piece.type != PieceType.PAWN:
+            return False
+
+        distance = last_move.to_square.rank - last_move.from_square.rank
+        abs_dist = abs(distance)
+        magnitude = 1 if distance > 0 else -1
+
+        # did they move two squares?
+        if abs_dist < 2:
+            return False
+
+        target_rank = last_move.from_square.rank + magnitude
+        target_square = self.board.square_from_coord(target_rank, last_move.from_square.file)
+
+        # is there an opponent pawn attacking the target square?
+        if not len(self.en_passant_attackers(target_square)):
+            return False
+
+        self.en_passant_target_square = target_square
+        return True
 
     def _castle_flag_for_location(self, color: Color, kingside: bool):
         can_castle_flag_map = {
@@ -200,11 +280,14 @@ class Game:
         self.moves.append(move)
         previous_player = self.current_player
         self.swap_player()
+        self.en_passant_target_square = None
 
         if type(move) == CastleMove:
             # this castle will not be allowed again
             move: CastleMove = move
             self.disallow_castle_for_location(move.color, move.kingside)
+        elif type(move) == EnPassantMove:
+            pass
         else:
             # also can't castle if a player moves their king
             if move.active_piece.type == PieceType.KING:

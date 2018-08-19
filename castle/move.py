@@ -1,5 +1,6 @@
 from castle.piece import Piece, PieceType, Color
 from castle.square import Square
+from typing import List
 
 
 class InvalidMoveError(Exception):
@@ -107,7 +108,15 @@ class MoveParser:
                                                               can_reach_square=move.to_square))
             # there should be exactly one source square
             if len(from_squares) != 1:
-                raise InvalidMoveError(f'{move_str} is ambiguous')
+                # check if this is en passant
+                if game.en_passant_eligible():
+                    rank = 5 if active_color == Color.WHITE else 4
+                    from_square = board.square_from_notation(f'{from_file}{rank}')
+                    unsafe_square = board.square_from_notation(f'{Square.index_to_file(move.to_square.file)}{rank}')
+                    return EnPassantMove(move.to_square, from_square, unsafe_square)
+                else:
+                    raise InvalidMoveError(f'{move_str} is ambiguous')
+
             move.from_square = from_squares[0]
             move.active_piece = move.from_square.occupant
             return move
@@ -123,11 +132,14 @@ class MoveParser:
             move.to_square = board.square_from_notation(move_str[1:])
 
         pieces_fulfilling_source_square_requirements: List[Square] = []
-        for square in board.squares_matching_filter(type=piece_type, color=active_color, file_str=from_file):
-            moves = board.get_moves(square)
-            if move.to_square in moves:
-                # found the piece to move
-                pieces_fulfilling_source_square_requirements.append(square)
+        for square in board.squares_matching_filter(
+                color=active_color,
+                type=piece_type,
+                file_str=from_file,
+                can_reach_square=move.to_square):
+            # found the piece to move
+            pieces_fulfilling_source_square_requirements.append(square)
+
         # if there were multiple pieces matching all the necessary criteria to perform the provided notation,
         # then the notation is invalid and must contain the source square's file
         if len(pieces_fulfilling_source_square_requirements) > 1:

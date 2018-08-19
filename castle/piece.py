@@ -55,6 +55,8 @@ class Piece:
         return f'<{self.color.value} {self.type.name}>'
 
     def __eq__(self, other):
+        if not other:
+            return False
         if self.color != other.color:
             return False
         if self.type != other.type:

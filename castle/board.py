@@ -1,7 +1,7 @@
 from typing import List, Set, Optional
 from castle.square import Square
 from castle.piece import PieceType, Piece, Color
-from castle.move import Move, CastleMove, MoveParser
+from castle.move import Move, CastleMove, EnPassantMove, MoveParser
 
 
 class InvalidChessNotationError(Exception):
@@ -47,6 +47,9 @@ class Board:
     def apply_move(self, move: Move):
         if type(move) == CastleMove:
             move: CastleMove = move
+            move.apply(self)
+        elif type(move) == EnPassantMove:
+            move: EnPassantMove = move
             move.apply(self)
         else:
             self.move_piece_to_square(move.from_square, move.to_square)
