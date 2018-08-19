@@ -54,6 +54,16 @@ class Piece:
     def __repr__(self):
         return f'<{self.color.value} {self.type.name}>'
 
+    def __eq__(self, other):
+        if self.color != other.color:
+            return False
+        if self.type != other.type:
+            return False
+        return True
+
+    def __hash__(self):
+        return hash((self.color, self.type))
+
     @property
     def value(self):
         if self.type == PieceType.PAWN:
@@ -65,3 +75,4 @@ class Piece:
         elif self.type == PieceType.QUEEN:
             return 9
         return 999
+
