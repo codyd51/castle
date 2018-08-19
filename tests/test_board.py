@@ -216,52 +216,18 @@ class BoardTests(unittest.TestCase):
             board.get_moves(board.square_from_notation('d5'))
         )
 
-    def test_king_moves(self):
-        from castle import MoveParser
-        # obstructed king with threat of check
-        board = Board()
-        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
-        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
-        board.place_piece(Piece(PieceType.ROOK, Color.BLACK), 'h3')
-        self.assertEqual(
-            {
-                MoveParser.parse_move(board, Color.WHITE, 'Kg2'),
-                MoveParser.parse_move(board, Color.WHITE, 'Kg1'),
-            },
-            board.get_all_legal_moves(Color.WHITE)
-        )
-
-        # obstructed king without threat of check
-        board = Board()
-        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
-        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
-        self.assertEqual(
-            {
-                MoveParser.parse_move(board, Color.WHITE, 'Kg2'),
-                MoveParser.parse_move(board, Color.WHITE, 'Kg1'),
-                MoveParser.parse_move(board, Color.WHITE, 'Kh2'),
-            },
-            board.get_all_legal_moves(Color.WHITE)
-        )
-
-        # unobstructed king
-        board = Board()
-        board.place_piece(Piece(PieceType.KING, Color.BLACK), 'e4')
-        self.assertEqual(
-            {
-                board.square_from_notation('d5'),
-                board.square_from_notation('e5'),
-                board.square_from_notation('d4'),
-                board.square_from_notation('f5'),
-                board.square_from_notation('d3'),
-                board.square_from_notation('f4'),
-                board.square_from_notation('e3'),
-                board.square_from_notation('f3'),
-            },
-            board.get_moves(board.square_from_notation('e4'))
-        )
-
     def test_pawn_pushed_forward(self):
+        # TODO(PT): test pawn promotion once it's implemented
         board = Board()
         board.place_piece(Piece(PieceType.PAWN, Color.WHITE), 'a8')
-        board.get_moves(board.square_from_notation('a8'))
+        # board.get_moves(board.square_from_notation('a8'))
+
+    def test_is_in_check(self):
+        board = Board()
+        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'e1')
+        board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'e3')
+        self.assertFalse(board.is_in_check(Color.WHITE))
+        board.move_piece_to_location(board.square_from_notation('e3'), 'd2')
+        self.assertTrue(board.is_in_check(Color.WHITE))
+        board.move_piece_to_location(board.square_from_notation('e1'), 'd2')
+        self.assertFalse(board.is_in_check(Color.WHITE))

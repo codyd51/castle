@@ -1,7 +1,7 @@
 import unittest
 
 import castle
-from castle import Game, Board, Piece, PieceType, Color, InvalidChessNotationError, PlayerType, MoveParser
+from castle import Game, Board, Piece, PieceType, Color, InvalidChessNotationError, PlayerType, MoveParser, FenGameConstructor
 
 
 class GameTests(unittest.TestCase):
@@ -12,13 +12,14 @@ class GameTests(unittest.TestCase):
 
     def test_simple(self):
         g = castle.Game(PlayerType.HUMAN, PlayerType.HUMAN)
-        move = castle.MoveParser.parse_move(g.board, castle.Color.WHITE, 'e4')
+        move = castle.MoveParser.parse_move(g, 'e4')
         self.assertEqual('e2', move.from_square.notation())
         self.assertEqual('e4', move.to_square.notation())
 
         # 1. e4 e5 2. Bd3
         g.apply_notation('e4')
-        move = castle.MoveParser.parse_move(g.board, castle.Color.WHITE, 'Bd3')
+        g.apply_notation('e5')
+        move = castle.MoveParser.parse_move(g, 'Bd3')
         self.assertEqual('f1', move.from_square.notation())
         self.assertEqual('d3', move.to_square.notation())
 
@@ -67,12 +68,11 @@ class GameTests(unittest.TestCase):
         g.board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'f3')
         g.board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'g4')
         g.board.place_piece(Piece(PieceType.BISHOP, Color.BLACK), 'e3')
-        g.board.pretty_print()
 
         # only way out of check is for pawn to capture queen
-        legal_moves = g.board.get_all_legal_moves(Color.WHITE)
+        legal_moves = g.get_all_legal_moves(Color.WHITE)
         self.assertEqual(len(legal_moves), 1)
-        self.assertEqual(MoveParser.parse_move(g.board, Color.WHITE, 'fg2'), legal_moves.pop())
+        self.assertEqual(MoveParser.parse_move(g, 'fg2'), legal_moves.pop())
 
         # capture the queen
         g.apply_notation('fg2')
@@ -81,12 +81,17 @@ class GameTests(unittest.TestCase):
 
         # now, white king is in check again by threat of black's g2 bishop
         # only move is to capture bishop
-        legal_moves = g.board.get_all_legal_moves(Color.WHITE)
+        legal_moves = g.get_all_legal_moves(Color.WHITE)
         self.assertEqual(len(legal_moves), 1)
-        self.assertEqual(MoveParser.parse_move(g.board, Color.WHITE, 'Kxg2'), legal_moves.pop())
+        self.assertEqual(MoveParser.parse_move(g, 'Kxg2'), legal_moves.pop())
 
     def test_white_kingside_castle(self):
         g = castle.Game(PlayerType.HUMAN, PlayerType.HUMAN)
+
+        # can't castle while obstructed
+        self.assertFalse(g.can_castle(Color.WHITE, True))
+        self.assertFalse(g.can_castle(Color.WHITE, False))
+
         g.apply_notation('e4')
         g.apply_notation('e5')
         g.apply_notation('Nf3')
@@ -96,7 +101,87 @@ class GameTests(unittest.TestCase):
         # white is now ready to kingside castle
         g.apply_notation('O-O')
 
-    def test_black_queenside_castle(self):
-        g = castle.Game(PlayerType.HUMAN, PlayerType.HUMAN)
+        castled_king_square = g.board.square_from_notation('g1')
+        self.assertIsNotNone(castled_king_square.occupant)
+        self.assertTrue(castled_king_square.occupant.color == Color.WHITE)
+        self.assertTrue(castled_king_square.occupant.type == PieceType.KING)
 
-    # TODO(PT): check all the castling rules
+        castled_rook_square = g.board.square_from_notation('f1')
+        self.assertIsNotNone(castled_rook_square.occupant)
+        self.assertTrue(castled_rook_square.occupant.color == Color.WHITE)
+        self.assertTrue(castled_rook_square.occupant.type == PieceType.ROOK)
+
+        # can't castle twice
+        self.assertFalse(g.can_castle(Color.WHITE, True))
+        self.assertFalse(g.can_castle(Color.WHITE, False))
+
+    def test_black_queenside_castle(self):
+        g = FenGameConstructor('r3kbnr/ppp1pppp/n2q4/3p1b2/2PPPP2/8/PP4PP/RNBQKBNR b KQkq - 0 0').game
+        self.assertTrue(g.can_black_castle_long)
+        self.assertTrue(g.can_black_castle_short)
+        self.assertTrue(g.can_castle(Color.BLACK, False))
+        self.assertFalse(g.can_castle(Color.BLACK, True))
+
+        # black is now ready to queenside castle
+        g.apply_notation('O-O-O')
+
+        castled_king_square = g.board.square_from_notation('c8')
+        self.assertIsNotNone(castled_king_square.occupant)
+        self.assertTrue(castled_king_square.occupant.color == Color.BLACK)
+        self.assertTrue(castled_king_square.occupant.type == PieceType.KING)
+
+        castled_rook_square = g.board.square_from_notation('d8')
+        self.assertIsNotNone(castled_rook_square.occupant)
+        self.assertTrue(castled_rook_square.occupant.color == Color.BLACK)
+        self.assertTrue(castled_rook_square.occupant.type == PieceType.ROOK)
+
+        # can't castle twice
+        self.assertFalse(g.can_castle(Color.BLACK, True))
+        self.assertFalse(g.can_castle(Color.BLACK, False))
+
+    def test_king_moves(self):
+        from castle import MoveParser
+        g = Game(PlayerType.HUMAN, PlayerType.HUMAN)
+        g.board.clear()
+        # obstructed king with threat of check
+        board = g.board
+        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
+        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
+        board.place_piece(Piece(PieceType.ROOK, Color.BLACK), 'h3')
+        self.assertEqual(
+            {
+                MoveParser.parse_move(g, 'Kg2'),
+                MoveParser.parse_move(g, 'Kg1'),
+            },
+            g.get_all_legal_moves(Color.WHITE)
+        )
+
+        # obstructed king without threat of check
+        g.board.clear()
+        board.place_piece(Piece(PieceType.KING, Color.WHITE), 'h1')
+        board.place_piece(Piece(PieceType.KNIGHT, Color.BLACK), 'h2')
+        self.assertEqual(
+            {
+                MoveParser.parse_move(g, 'Kg2'),
+                MoveParser.parse_move(g, 'Kg1'),
+                MoveParser.parse_move(g, 'Kh2'),
+            },
+            g.get_all_legal_moves(Color.WHITE)
+        )
+
+        # unobstructed king
+        g.board.clear()
+        board.place_piece(Piece(PieceType.KING, Color.BLACK), 'e4')
+        self.assertEqual(
+            {
+                board.square_from_notation('d5'),
+                board.square_from_notation('e5'),
+                board.square_from_notation('d4'),
+                board.square_from_notation('f5'),
+                board.square_from_notation('d3'),
+                board.square_from_notation('f4'),
+                board.square_from_notation('e3'),
+                board.square_from_notation('f3'),
+            },
+            board.get_moves(board.square_from_notation('e4'))
+        )
