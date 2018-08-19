@@ -28,11 +28,10 @@ class HumanPlayer(Player):
         super(HumanPlayer, self).__init__(color)
         self.name = 'Player'
 
-    def play_move(self, board: Board) -> Move:
+    def play_move(self, board: Board) -> str:
         super(HumanPlayer, self).play_move(board)
         # human player's move consists of asking the user for a move in chess notation
-        player_move_str = input()
-        return MoveParser.parse_move(board, self.color, player_move_str)
+        return input()
 
 
 class RandomPlayer(Player):

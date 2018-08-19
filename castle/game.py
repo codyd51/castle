@@ -268,6 +268,28 @@ class Game:
         move = MoveParser.parse_move(self, move_str)
         self.apply_move(move)
 
+    def apply_record(self, game_str: str) -> None:
+        # TODO spin off this logic into a better place
+        # XXX As is this assumes the board is in the starting position
+        from .fen_parser import Parser, EndOfStream
+        parser = Parser(game_str)
+        try:
+            move_idx = 1
+            while True:
+                parser.match_str(f'{move_idx}.')
+                # optional space
+                if parser.peek_tok() == ' ':
+                    parser.match(' ')
+
+                white_move = ''.join(parser.read_to(' '))
+                self.apply_notation(white_move)
+                black_move = ''.join(parser.read_to(' '))
+                self.apply_notation(black_move)
+
+                move_idx += 1
+        except EndOfStream:
+            pass
+
     def swap_player(self):
         self.current_player = self.white_player if self.current_player == self.black_player else self.black_player
 
