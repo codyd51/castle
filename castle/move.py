@@ -204,3 +204,43 @@ class CastleMove(Move):
 
         board.move_piece_to_square(king_curr_square, king_orig_square)
         board.move_piece_to_square(rook_curr_square, rook_orig_square)
+
+
+class EnPassantMove(Move):
+    def __init__(self, target_square: Square, attacker: Square, unsafe_square: Square):
+        self.target_square = target_square
+        self.attacker = attacker
+        self.unsafe_square = unsafe_square
+
+        self.active_piece = self.attacker.occupant
+
+        notation = f'{Square.index_to_file(attacker.file)}x{self.target_square.notation()}'
+        super(EnPassantMove, self).__init__(self.attacker.occupant.color, notation)
+
+    def __eq__(self, other):
+        if self.target_square != other.target_square:
+            return False
+        if self.attacker != other.attacker:
+            return False
+        if self.unsafe_square != other.unsafe_square:
+            return False
+        if self.color != other.color:
+            return False
+        return True
+
+    def __hash__(self):
+        return hash((self.target_square, self.attacker, self.unsafe_square))
+
+    def __repr__(self):
+        sup = super(EnPassantMove, self).__repr__()
+        return f'e.p. {sup}'
+
+    def apply(self, board: 'Board'):
+        board.move_piece_to_square(self.attacker, self.target_square)
+        if not self.target_square:
+            raise RuntimeError(f'unsafe square for en passant was empty?')
+        self.unsafe_square.occupant = None
+
+    def undo(self, board: 'Board'):
+        board.move_piece_to_square(self.target_square, self.attacker)
+        self.unsafe_square.occupant = Piece(PieceType.PAWN, self.color.opposite())
