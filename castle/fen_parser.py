@@ -121,8 +121,12 @@ class FenGameConstructor:
         self.parse_side_to_move()
         self.parse_castling_ability()
         self.parse_en_passant_target_square()
-        self.parse_fullmove_counter()
-        self.parse_halfmove_clock()
+        # optional
+        try:
+            self.parse_fullmove_counter()
+            self.parse_halfmove_clock()
+        except EndOfStream:
+            pass
 
     # <Piece Placement> ::= <rank8>'/'<rank7>'/'<rank6>'/'<rank5>'/'<rank4>'/'<rank3>'/'<rank2>'/'<rank1>
     # <rank>       ::= [<digit17>]<piece> {[<digit17>]<piece>} [<digit17>] | '8'
@@ -195,9 +199,12 @@ class FenGameConstructor:
     # <fileLetter> ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h'
     # <eprank>     ::= '3' | '6'
     def parse_en_passant_target_square(self):
-        self.parser.read_to(' ', include_delim=True)
-        # self.parser.match('-')
-        # self.parser.match(' ')
+        if self.parser.peek_tok() == '-':
+            self.parser.match('-')
+            return
+
+        target = self.parser.read_to(' ')
+        self.game.en_passant_target_square = self.game.board.square_from_notation(target)
 
     # <Fullmove counter> ::= <digit19> {<digit>}
     def parse_fullmove_counter(self):
