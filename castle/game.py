@@ -371,10 +371,9 @@ class Game:
         self.swap_player()
 
     def perft(self, depth: int) -> int:
-        if depth == 0:
-            return 1
-
         moves = self.get_all_legal_moves(self.current_player.color)
+        if depth == 1:
+            return len(moves)
         game_states = 0
 
         for move in moves:
@@ -383,10 +382,13 @@ class Game:
             self.undo_move()
         return game_states
 
-    def print_perft(self, depth: int) -> None:
-        for i in range(0, depth):
+    def print_perft(self, depth: int) -> List[int]:
+        perfts = []
+        for i in range(1, depth+1):
             perft = self.perft(i)
             print(f'perft({i}) = {perft}')
+            perfts.append(perft)
+        return perfts
 
     def is_in_checkmate(self, color: Color) -> bool:
         """Can the opposite color capture the King on their next turn, and the playing color has no way out of this?
